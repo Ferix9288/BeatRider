@@ -1,0 +1,101 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    tools:context="com.example.beatrider.MenuActivity" >
+
+    <!--
+         The primary full-screen view. This can be replaced with whatever view
+         is needed to present your content, e.g. VideoView, SurfaceView,
+         TextureView, etc.
+    -->
+    <!--
+         This FrameLayout insets its children based on system windows using
+         android:fitsSystemWindows.
+    -->
+	<TextView
+           android:id="@+id/fullscreen_content"
+           android:layout_width="match_parent"
+           android:layout_height="match_parent"
+           android:layout_gravity="center"
+           android:text="" />	
+
+	<RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+                
+	 	<TextView
+	          android:id="@+id/start"
+	          android:layout_width="wrap_content"
+	          android:layout_height="wrap_content"
+	          android:layout_centerHorizontal = "true"
+	          android:layout_above = "@+id/acheivements"	          
+			  android:layout_marginBottom = "20dp"
+	          android:text="Start"
+	          android:textAppearance="?android:attr/textAppearanceLarge" 
+	          android:onClick="onClick"                
+		      android:clickable="true"/>	 		
+	
+	 	 <TextView
+	          android:id="@+id/acheivements"
+	          android:layout_width="wrap_content"
+	          android:layout_height="wrap_content"
+	          android:layout_centerHorizontal = "true"
+	          android:layout_centerVertical = "true"
+	          android:text="Acheivements"
+	          android:textAppearance="?android:attr/textAppearanceLarge" 
+	          android:onClick="onClick"                
+		      android:clickable="true"/>
+	 	 	
+	  	<TextView
+	          android:id="@+id/settings"
+	          android:layout_width="wrap_content"
+	          android:layout_height="wrap_content"
+	          android:layout_centerHorizontal = "true"
+	          android:layout_below = "@+id/acheivements"
+			  android:layout_marginTop = "20dp"	
+	          android:text="Settings"
+	          android:textAppearance="?android:attr/textAppearanceLarge" 
+	          android:onClick="onClick"                
+		      android:clickable="true"/>
+	  	
+	  	<TextView
+	          android:id="@+id/about"
+	          android:layout_width="wrap_content"
+	          android:layout_height="wrap_content"
+	          android:layout_centerHorizontal = "true"
+	          android:layout_below = "@+id/settings"
+			  android:layout_marginTop = "20dp"	
+	          android:text="About"
+	          android:textAppearance="?android:attr/textAppearanceLarge" 
+	          android:onClick="onClick"                
+		      android:clickable="true"/>
+	  		
+ 	</RelativeLayout>
+ 
+	
+   <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true" >
+
+        
+  	
+          
+               
+        <LinearLayout
+            android:id="@+id/fullscreen_content_controls"
+            style="?metaButtonBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:background="@color/black_overlay"
+            android:orientation="horizontal"
+            tools:ignore="UselessParent" >
+        </LinearLayout>
+
+        
+    </FrameLayout>
+
+</FrameLayout>
