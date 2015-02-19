@@ -89,15 +89,22 @@ public class AndroidGraphics implements Graphics {
     }
 
     @Override
-    public void drawRect(int x, int y, int width, int height, int color) {
+    public void drawRect(int x, int y, int width, int height, int color, Style style) {
         paint.setColor(color);
-        paint.setStyle(Style.FILL);
+        paint.setStyle(style);
         canvas.drawRect(x, y, x + width - 1, y + height - 1, paint);
     }
     
     @Override
+    public void drawCircle(int x, int y, int radius, int color, Style style) {
+    	paint.setColor(color);
+    	paint.setStyle(style);
+    	canvas.drawCircle(x, y, radius, paint);
+    }
+    
+    @Override
     public void drawARGB(int a, int r, int g, int b) {
-        paint.setStyle(Style.FILL);
+       paint.setStyle(Style.FILL);
        canvas.drawARGB(a, r, g, b);
     }
     

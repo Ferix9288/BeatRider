@@ -2,8 +2,12 @@ package com.example.beatrider;
 
 import java.util.List;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Paint.Style;
+import android.util.Log;
 
 import com.kilobolt.framework.Game;
 import com.kilobolt.framework.Graphics;
@@ -15,6 +19,10 @@ public class GameScreen extends Screen {
     enum GameState {
         Ready, Running, Paused, GameOver
     }
+
+	private static final boolean DEBUG = true;
+
+	private static final String TAG = "Game Screen";
 
     GameState state = GameState.Ready;
 
@@ -72,8 +80,9 @@ public class GameScreen extends Screen {
         
         //This is identical to the update() method from our Unit 2/3 game.
         
-        
+        if (DEBUG) Log.i(TAG, "updateRunning: touchEvents" + touchEvents);
         // 1. All touch input is handled here:
+        
         int len = touchEvents.size();
         for (int i = 0; i < len; i++) {
             TouchEvent event = touchEvents.get(i);
@@ -114,6 +123,7 @@ public class GameScreen extends Screen {
         // 3. Call individual update() methods here.
         // This is where all the game updates happen.
         // For example, robot.update();
+ 
     }
 
     private void updatePaused(List<TouchEvent> touchEvents) {
@@ -134,7 +144,10 @@ public class GameScreen extends Screen {
                 if (event.x > 300 && event.x < 980 && event.y > 100
                         && event.y < 500) {
                     nullify();
-                    game.setScreen(new MainMenuScreen(game));
+    				Activity gameActivity = (Activity) game;
+
+                    Intent launchMenu = new Intent(gameActivity, MenuActivity.class);
+                    gameActivity.startActivity(launchMenu);
                     return;
                 }
             }
@@ -145,7 +158,7 @@ public class GameScreen extends Screen {
     @Override
     public void paint(float deltaTime) {
         Graphics g = game.getGraphics();
-
+        g.clearScreen(Color.BLACK);
         // First draw the game elements.
 
         // Example:
@@ -153,15 +166,23 @@ public class GameScreen extends Screen {
         // g.drawImage(Assets.character, characterX, characterY);
 
         // Secondly, draw the UI above the game elements.
-        if (state == GameState.Ready)
+        if (state == GameState.Ready) {
             drawReadyUI();
-        if (state == GameState.Running)
+        }
+        
+        if (state == GameState.Running) {
             drawRunningUI();
-        if (state == GameState.Paused)
+        	drawRunning();
+        }
+        
+        if (state == GameState.Paused) {
             drawPausedUI();
-        if (state == GameState.GameOver)
+        }
+        
+        if (state == GameState.GameOver) {
             drawGameOverUI();
-
+        }
+        
     }
 
     private void nullify() {
@@ -176,16 +197,21 @@ public class GameScreen extends Screen {
 
     private void drawReadyUI() {
         Graphics g = game.getGraphics();
-
-        g.drawARGB(155, 0, 0, 0);
-        g.drawString("Tap each side of the screen to move in that direction.",
+        
+        g.drawString("Tap to begin the game.",
                 640, 300, paint);
-
     }
 
     private void drawRunningUI() {
         Graphics g = game.getGraphics();
-
+    }
+    
+    private void drawRunning() {
+        BeatCircle testCircle = new BeatCircle();
+        testCircle.xLocation = 640;
+        testCircle.yLocation = 300;
+        testCircle.radius = 100;
+        testCircle.draw(game.getGraphics());
     }
 
     private void drawPausedUI() {
@@ -197,7 +223,7 @@ public class GameScreen extends Screen {
 
     private void drawGameOverUI() {
         Graphics g = game.getGraphics();
-        g.drawRect(0, 0, 1281, 801, Color.BLACK);
+        g.drawRect(0, 0, 1281, 801, Color.BLACK, Style.FILL);
         g.drawString("GAME OVER.", 640, 300, paint);
 
     }
