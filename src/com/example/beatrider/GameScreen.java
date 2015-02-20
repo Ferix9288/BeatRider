@@ -1,5 +1,6 @@
 package com.example.beatrider;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
@@ -12,8 +13,10 @@ import android.util.Log;
 import com.kilobolt.framework.Game;
 import com.kilobolt.framework.Graphics;
 import com.kilobolt.framework.Image;
+import com.kilobolt.framework.Pool;
 import com.kilobolt.framework.Screen;
 import com.kilobolt.framework.Input.TouchEvent;
+import com.kilobolt.framework.Pool.PoolObjectFactory;
 
 public class GameScreen extends Screen {
     enum GameState {
@@ -26,6 +29,26 @@ public class GameScreen extends Screen {
 
     GameState state = GameState.Ready;
 
+    /** 
+     * Beat Circle Factory.
+     */
+    static Pool<BeatCircle> beatCirclePool;
+	List<BeatCircle> beatCircles = new ArrayList<BeatCircle>();
+	List<BeatCircle> beatCirclesBuffer = new ArrayList<BeatCircle>();
+
+	static PoolObjectFactory<BeatCircle> factory;
+	
+	static {
+		factory = new PoolObjectFactory<BeatCircle>() {
+            @Override
+            public BeatCircle createObject() {
+                return new BeatCircle();
+            }            
+        };
+        
+        beatCirclePool = new Pool<BeatCircle>(factory, 50);
+	}
+	
     // Variable Setup
     // You would create game objects here.
 
@@ -207,11 +230,9 @@ public class GameScreen extends Screen {
     }
     
     private void drawRunning() {
-        BeatCircle testCircle = new BeatCircle();
-        testCircle.xLocation = 640;
-        testCircle.yLocation = 300;
-        testCircle.radius = 100;
-        testCircle.draw(game.getGraphics());
+		BeatCircle newBeatCircle = beatCirclePool.newObject();
+		newBeatCircle.setLocation(640, 300, 100);
+		newBeatCircle.draw(game.getGraphics());
     }
 
     private void drawPausedUI() {
