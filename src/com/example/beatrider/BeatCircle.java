@@ -18,14 +18,13 @@ public class BeatCircle extends GameObject {
 	static final int DONE = 2;
 	
 	static final int FLOAT_TIME = 100;
-	static final float ON_DURATION = 300;
+	static final float LENIENCY = 10;
+	static final float ON_DURATION = 200; //2 seconds
 	
 
-	static final int BAD_TIMING = 200;
-	static final int OK_TIMING = 250;
-	static final int GOOD_TIMING = 270;
-	static final int PERFECT_TIMING = 285;
-	
+	static final float OK_TIMING = ON_DURATION*.6f;
+	static final float GOOD_TIMING = ON_DURATION*.8f;
+	static final float PERFECT_TIMING = ON_DURATION*.95f;
 	
 	private static final boolean DEBUG = true;
 	private static final String TAG = "Beat Circle";
@@ -39,6 +38,7 @@ public class BeatCircle extends GameObject {
 	float lifeSpan; 
 	boolean visible;
 	Paint paint;
+	int alpha;
 	
 	
 	public BeatCircle() {
@@ -46,7 +46,7 @@ public class BeatCircle extends GameObject {
 		
         // Defining a paint object
         this.paint = new Paint();
-        this.paint.setTextSize(30);
+        this.paint.setTextSize(50);
         this.paint.setTextAlign(Paint.Align.CENTER);
         this.paint.setAntiAlias(true);
         this.paint.setColor(Color.WHITE);        
@@ -59,11 +59,13 @@ public class BeatCircle extends GameObject {
 
 		this.xLeft = x - radius;
 		this.xRight = x + radius;
-		this.yDown = y - radius;
-		this.yUp = y + radius;
+		this.yDown = y + radius;
+		this.yUp = y - radius;
 		
 		this.state = ON;
+		this.lifeSpan = 0;
 		this.wordLifeSpan = 0;
+		this.alpha = 0xFF;
 	}
 	
 	void draw(Graphics g) {
@@ -72,33 +74,43 @@ public class BeatCircle extends GameObject {
 		switch(this.state) {
 			case ON: {
 				g.drawCircle(this.xLocation, this.yLocation, this.radius, color,  Style.STROKE);
+				float sweepAngle = 360 * (lifeSpan/ON_DURATION);
+				g.drawArc(xLeft, yUp, xRight, yDown, -90, sweepAngle, true, paint);
 				break;
 				//else time runs out
 			}
 			
 			case RATING: {
+				
+				alpha = 0xF0 - (0xF0/FLOAT_TIME)*this.wordLifeSpan;
+				this.paint.setAlpha(alpha);	
+				
 				switch (this.rating) {
 					case Miss:
+						paint.setARGB(alpha, 0xFF, 0x00, 0x00); //Red        
 						g.drawString("Miss!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
 						break;
 					case Bad:
+						paint.setARGB(alpha, 0xFF, 0x00, 0xFF); //Magenta        
 						g.drawString("Bad!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
 						break;
 					case Ok:
+						paint.setARGB(alpha, 0x00, 0xFF, 0xFF); //Cyan
 						g.drawString("Ok!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
-						break;
-						
+						break;						
 					case Good:
+						paint.setARGB(alpha, 0x00, 0x00, 0xFF); //Blue
 						g.drawString("Good!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
 						break;
 					case Perfect:
+				        this.paint.setColor(Color.GREEN);
+				        paint.setARGB(alpha, 0x00, 0xFF, 0x00); //Green
 						g.drawString("Perfect!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
 						break;
 					default:
 						break;
 				} //end switch
-				
-				paint.setAlpha(0xF0 - (0xF0/FLOAT_TIME)*this.wordLifeSpan);				
+							
 				break;
 			}
 			
@@ -113,7 +125,7 @@ public class BeatCircle extends GameObject {
 			case ON: {
 				lifeSpan += deltaTime;
 				
-				if (lifeSpan > ON_DURATION){
+				if (lifeSpan > ON_DURATION + LENIENCY){
 					rating = GameUtil.Rating.Miss;
 					this.state = RATING;
 				} else if (e != null) {
@@ -129,6 +141,7 @@ public class BeatCircle extends GameObject {
 						} else {
 							rating = GameUtil.Rating.Bad;
 						}
+						
 						this.state = RATING;
 					} 
 				} 			
@@ -160,8 +173,8 @@ public class BeatCircle extends GameObject {
 	 * @param y
 	 */
 	boolean isTouched(int x, int y) {
-		if (x >= xLeft && x < xRight) {
-			if (y >= yDown && y <= yUp) {
+		if (x >= xLeft && x <= xRight) {
+			if (y >= yUp && y <= yDown) {
 				return true;
 			}
 		}

@@ -12,6 +12,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Rect;
+import android.graphics.RectF;
 
 import com.kilobolt.framework.Graphics;
 import com.kilobolt.framework.Image;
@@ -83,6 +84,14 @@ public class AndroidGraphics implements Graphics {
 
 
     @Override
+	public void drawArc(float left, float top, float right, float bottom, float startAngle, float sweepAngle, boolean useCenter, Paint paint) {
+    	//canvas.drawArc(left, top, right, bottom, startAngle, sweepAngle, useCenter, paint);
+    	RectF rect = new RectF(left, top, right, bottom);
+    	
+    	canvas.drawArc(rect, startAngle, sweepAngle, useCenter, paint);
+    }
+    
+    @Override
     public void drawLine(int x, int y, int x2, int y2, int color) {
         paint.setColor(color);
         canvas.drawLine(x, y, x2, y2, paint);
@@ -140,8 +149,7 @@ public class AndroidGraphics implements Graphics {
     
     public void drawScaledImage(Image Image, int x, int y, int width, int height, int srcX, int srcY, int srcWidth, int srcHeight){
     	
-    	
-   	 srcRect.left = srcX;
+    	srcRect.left = srcX;
         srcRect.top = srcY;
         srcRect.right = srcX + srcWidth;
         srcRect.bottom = srcY + srcHeight;
@@ -156,6 +164,11 @@ public class AndroidGraphics implements Graphics {
         
         canvas.drawBitmap(((AndroidImage) Image).bitmap, srcRect, dstRect, null);
         
+    }
+    
+    @Override
+    public Canvas getCanvas(){
+    	return this.canvas;
     }
    
     @Override

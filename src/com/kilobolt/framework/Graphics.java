@@ -1,6 +1,7 @@
 package com.kilobolt.framework;
 
 
+import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 
@@ -13,6 +14,8 @@ public interface Graphics {
 
 	public void clearScreen(int color);
 
+	public void drawArc(float left, float top, float right, float bottom, float startAngle, float sweepAngle, boolean useCenter, Paint paint);
+	
 	public void drawLine(int x, int y, int x2, int y2, int color);
 
 	public void drawRect(int x, int y, int width, int height, int color, Style style);
@@ -26,6 +29,8 @@ public interface Graphics {
 
 	void drawString(String text, int x, int y, Paint paint);
 
+	public Canvas getCanvas();
+	
 	public int getWidth();
 
 	public int getHeight();

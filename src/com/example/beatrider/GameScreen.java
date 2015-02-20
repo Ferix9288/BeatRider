@@ -8,6 +8,7 @@ import java.util.Random;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
@@ -128,7 +129,7 @@ public class GameScreen extends Screen {
         
         //This is identical to the update() method from our Unit 2/3 game.
         
-        //if (DEBUG) Log.i(TAG, "updateRunning: touchEvents" + touchEvents);
+        if (DEBUG) Log.i(TAG, "updateRunning: touchEvents" + touchEvents);
         
     	// 1. All touch input is handled here:
         
@@ -292,7 +293,7 @@ public class GameScreen extends Screen {
     private void drawRunningUI() {
         Graphics g = game.getGraphics();
         g.drawString("Pause Button here.",
-                game.getGraphics().getWidth() - 50, game.getGraphics().getHeight() - 10, paint);
+                game.getGraphics().getWidth() - 50, game.getGraphics().getHeight() - 10, paint);        
     }
     
     private void drawRunning() {
