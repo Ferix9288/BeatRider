@@ -1,7 +1,10 @@
 package com.example.beatrider;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -9,6 +12,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.util.Log;
+import android.util.Range;
 
 import com.kilobolt.framework.Game;
 import com.kilobolt.framework.Graphics;
@@ -33,7 +37,7 @@ public class GameScreen extends Screen {
      * Beat Circle Factory.
      */
     static Pool<BeatCircle> beatCirclePool;
-	List<BeatCircle> beatCircles = new ArrayList<BeatCircle>();
+	List<BeatCircle> inGameBeatCircles = new ArrayList<BeatCircle>();
 	List<BeatCircle> beatCirclesBuffer = new ArrayList<BeatCircle>();
 
 	static PoolObjectFactory<BeatCircle> factory;
@@ -78,14 +82,22 @@ public class GameScreen extends Screen {
         // Refer to Unit 3's code. We did a similar thing without separating the
         // update methods.
 
-        if (state == GameState.Ready)
+        if (state == GameState.Ready) {
             updateReady(touchEvents);
-        if (state == GameState.Running)
+        }
+       
+        if (state == GameState.Running) {
+        	generateBeats();
             updateRunning(touchEvents, deltaTime);
-        if (state == GameState.Paused)
+        }
+       
+        if (state == GameState.Paused) {
             updatePaused(touchEvents);
-        if (state == GameState.GameOver)
+        }
+        
+        if (state == GameState.GameOver) {
             updateGameOver(touchEvents);
+        }
     }
 
     private void updateReady(List<TouchEvent> touchEvents) {
@@ -99,6 +111,16 @@ public class GameScreen extends Screen {
             state = GameState.Running;
     }
 
+    private void generateBeats() {
+    	int currentBeats = inGameBeatCircles.size();
+    	//if (DEBUG) Log.i(TAG, "generateBeats:" + currentBeats);
+
+    	if (currentBeats < 1) {
+			BeatCircle newBeatCircle = beatCirclePool.newObject();
+			newBeatCircle.setLocation(640, 300, 100);
+			inGameBeatCircles.add(newBeatCircle);
+    	}
+    }
     private void updateRunning(List<TouchEvent> touchEvents, float deltaTime) {
         
         //This is identical to the update() method from our Unit 2/3 game.
@@ -107,33 +129,50 @@ public class GameScreen extends Screen {
         // 1. All touch input is handled here:
         
         int len = touchEvents.size();
-        for (int i = 0; i < len; i++) {
-            TouchEvent event = touchEvents.get(i);
-
-            if (event.type == TouchEvent.TOUCH_DOWN) {
-
-                if (event.x < 640) {
-                    // Move left.
-                }
-
-                else if (event.x > 640) {
-                    // Move right.
-                }
-
-            }
-
-            if (event.type == TouchEvent.TOUCH_UP) {
-
-                if (event.x < 640) {
-                    // Stop moving left.
-                }
-
-                else if (event.x > 640) {
-                    // Stop moving right. }
-                }
-            }
+        if (len == 0) {
+            for (int j = 0; j < inGameBeatCircles.size(); j++) {
+            	BeatCircle beatCircle = inGameBeatCircles.get(j);
+            	beatCircle.update(null, deltaTime);
+            	if (beatCircle.isDone()) inGameBeatCircles.remove(j);
+            }  	
+        } else {
+	        for (int i = 0; i < len; i++) {
+	            TouchEvent event = touchEvents.get(i);
+	            
+	            //Update Beat Circles
+	            for (int j = 0; j < inGameBeatCircles.size(); j++) {
+	            	BeatCircle beatCircle = inGameBeatCircles.get(j);
+	            	beatCircle.update(event, deltaTime);
+	            	if (beatCircle.isDone()) inGameBeatCircles.remove(j);
+	            }
+	            
+	            
+	           
+	            if (event.type == TouchEvent.TOUCH_DOWN) {
+	
+	                if (event.x < 640) {
+	                    // Move left.
+	                }
+	
+	                else if (event.x > 640) {
+	                    // Move right.
+	                }
+	
+	            }
+	
+	            if (event.type == TouchEvent.TOUCH_UP) {
+	
+	                if (event.x < 640) {
+	                    // Stop moving left.
+	                }
+	
+	                else if (event.x > 640) {
+	                    // Stop moving right. }
+	                }
+	            }
 
             
+	        }
         }
         
         // 2. Check miscellaneous events like death:
@@ -227,12 +266,16 @@ public class GameScreen extends Screen {
 
     private void drawRunningUI() {
         Graphics g = game.getGraphics();
+        g.drawString("Pause Button here.",
+                game.getGraphics().getWidth() - 50, game.getGraphics().getHeight() - 10, paint);
     }
     
     private void drawRunning() {
-		BeatCircle newBeatCircle = beatCirclePool.newObject();
-		newBeatCircle.setLocation(640, 300, 100);
-		newBeatCircle.draw(game.getGraphics());
+    	int size = inGameBeatCircles.size();
+    	for (int i = 0; i < size; i++ ) {
+    		BeatCircle currentBeatCircle = inGameBeatCircles.get(i);
+    		currentBeatCircle.draw(game.getGraphics());
+    	}
     }
 
     private void drawPausedUI() {
