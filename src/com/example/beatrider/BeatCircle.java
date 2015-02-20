@@ -75,7 +75,15 @@ public class BeatCircle extends GameObject {
 			case ON: {
 				g.drawCircle(this.xLocation, this.yLocation, this.radius, color,  Style.STROKE);
 				float sweepAngle = 360 * (lifeSpan/ON_DURATION);
-				g.drawArc(xLeft, yUp, xRight, yDown, -90, sweepAngle, true, paint);
+//		        this.paint.setColor(Color.WHITE);    
+//		        this.paint.setStyle(Style.FILL);        
+//		        this.paint.setStrokeWidth(1);
+//
+//				g.drawArc(xLeft, yUp, xRight, yDown, -90, sweepAngle, true, paint);
+		        this.paint.setColor(Color.YELLOW);        
+		        this.paint.setStyle(Style.STROKE);
+		        this.paint.setStrokeWidth(10);
+		        g.drawArc(xLeft-20, yUp-20, xRight+20, yDown+20, -90, sweepAngle, true, paint);
 				break;
 				//else time runs out
 			}
@@ -84,7 +92,8 @@ public class BeatCircle extends GameObject {
 				
 				alpha = 0xF0 - (0xF0/FLOAT_TIME)*this.wordLifeSpan;
 				this.paint.setAlpha(alpha);	
-				
+		        this.paint.setStrokeWidth(1);				
+		        
 				switch (this.rating) {
 					case Miss:
 						paint.setARGB(alpha, 0xFF, 0x00, 0x00); //Red        
