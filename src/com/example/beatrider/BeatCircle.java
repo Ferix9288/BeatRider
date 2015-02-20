@@ -7,6 +7,7 @@ import android.graphics.Paint.Style;
 import android.graphics.PathEffect;
 import android.util.Log;
 
+import com.example.beatrider.GameUtil.Rating;
 import com.kilobolt.framework.Graphics;
 import com.kilobolt.framework.Input.TouchEvent;
 
@@ -17,6 +18,15 @@ public class BeatCircle extends GameObject {
 	static final int DONE = 2;
 	
 	static final int FLOAT_TIME = 100;
+	static final float ON_DURATION = 300;
+	
+
+	static final int BAD_TIMING = 200;
+	static final int OK_TIMING = 250;
+	static final int GOOD_TIMING = 270;
+	static final int PERFECT_TIMING = 285;
+	
+	
 	private static final boolean DEBUG = true;
 	private static final String TAG = "Beat Circle";
 	
@@ -24,6 +34,7 @@ public class BeatCircle extends GameObject {
 	int xLocation, yLocation, radius;
 	int xLeft, xRight, yDown, yUp; //Hitbox
 	int state;
+	Rating rating;
 	int wordLifeSpan;
 	float lifeSpan; 
 	boolean visible;
@@ -66,7 +77,27 @@ public class BeatCircle extends GameObject {
 			}
 			
 			case RATING: {
-				g.drawString("Perfect!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
+				switch (this.rating) {
+					case Miss:
+						g.drawString("Miss!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
+						break;
+					case Bad:
+						g.drawString("Bad!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
+						break;
+					case Ok:
+						g.drawString("Ok!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
+						break;
+						
+					case Good:
+						g.drawString("Good!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
+						break;
+					case Perfect:
+						g.drawString("Perfect!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
+						break;
+					default:
+						break;
+				} //end switch
+				
 				paint.setAlpha(0xF0 - (0xF0/FLOAT_TIME)*this.wordLifeSpan);				
 				break;
 			}
@@ -80,11 +111,27 @@ public class BeatCircle extends GameObject {
 	void update(TouchEvent e, float deltaTime) {
 		switch(this.state) {
 			case ON: {
-				if (e != null) {
+				lifeSpan += deltaTime;
+				
+				if (lifeSpan > ON_DURATION){
+					rating = GameUtil.Rating.Miss;
+					this.state = RATING;
+				} else if (e != null) {
 					if (isTouched(e.x, e.y)) {
+						if (DEBUG) Log.i(TAG, "Touched: " + this.lifeSpan);
+
+						if (lifeSpan >= PERFECT_TIMING) {
+							rating = GameUtil.Rating.Perfect;
+						} else if (lifeSpan >= GOOD_TIMING) {
+							rating = GameUtil.Rating.Good;
+						} else if (lifeSpan >= OK_TIMING) {
+							rating = GameUtil.Rating.Ok;
+						} else {
+							rating = GameUtil.Rating.Bad;
+						}
 						this.state = RATING;
 					} 
-				}
+				} 			
 				break;
 				//else time runs out
 			}

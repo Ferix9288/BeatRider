@@ -32,6 +32,8 @@ public class GameScreen extends Screen {
 	private static final String TAG = "Game Screen";
 
     GameState state = GameState.Ready;
+    
+    GameReport report;
 
     /** 
      * Beat Circle Factory.
@@ -70,7 +72,8 @@ public class GameScreen extends Screen {
         paint.setTextAlign(Paint.Align.CENTER);
         paint.setAntiAlias(true);
         paint.setColor(Color.WHITE);
-
+        
+        report = new GameReport();
     }
 
     @Override
@@ -125,15 +128,19 @@ public class GameScreen extends Screen {
         
         //This is identical to the update() method from our Unit 2/3 game.
         
-        if (DEBUG) Log.i(TAG, "updateRunning: touchEvents" + touchEvents);
-        // 1. All touch input is handled here:
+        //if (DEBUG) Log.i(TAG, "updateRunning: touchEvents" + touchEvents);
+        
+    	// 1. All touch input is handled here:
         
         int len = touchEvents.size();
         if (len == 0) {
             for (int j = 0; j < inGameBeatCircles.size(); j++) {
             	BeatCircle beatCircle = inGameBeatCircles.get(j);
             	beatCircle.update(null, deltaTime);
-            	if (beatCircle.isDone()) inGameBeatCircles.remove(j);
+            	if (beatCircle.isDone()) {
+            		inGameBeatCircles.remove(j);
+            		report.missCounter ++;
+            	}
             }  	
         } else {
 	        for (int i = 0; i < len; i++) {
@@ -143,7 +150,25 @@ public class GameScreen extends Screen {
 	            for (int j = 0; j < inGameBeatCircles.size(); j++) {
 	            	BeatCircle beatCircle = inGameBeatCircles.get(j);
 	            	beatCircle.update(event, deltaTime);
-	            	if (beatCircle.isDone()) inGameBeatCircles.remove(j);
+	            	if (beatCircle.isDone()) {
+	            		inGameBeatCircles.remove(j);
+	            		switch(beatCircle.rating) {
+							case Bad:
+								report.badCounter++;
+								break;
+							case Ok:
+								report.okCounter++;
+								break;
+							case Good:
+								report.goodCounter++;
+								break;
+							case Perfect:
+								report.perfectCounter++;
+								break;
+							default:
+								break;
+	            		}
+	            	}
 	            }
 	            
 	            
