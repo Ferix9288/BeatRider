@@ -28,7 +28,7 @@ public class GameScreen extends Screen {
         Ready, Running, Paused, GameOver
     }
 
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 
 	private static final String TAG = "Game Screen";
 
@@ -55,16 +55,17 @@ public class GameScreen extends Screen {
             @Override
             public BeatCircle createObject() {
                 return new BeatCircle();
-            }            
+            }
+            
         };
         
         beatCirclePool = new Pool<BeatCircle>(beatCircleFactory, 50);
         
         dragCircleFactory = new PoolObjectFactory<DragCircle>() {
-            @Override
             public DragCircle createObject() {
                 return new DragCircle();
             }            
+            
         };
         
         dragCirclePool = new Pool<DragCircle>(dragCircleFactory, 50);
@@ -133,18 +134,18 @@ public class GameScreen extends Screen {
     	int currentBeats = inGameBeatCircles.size();
     	//if (DEBUG) Log.i(TAG, "generateBeats:" + currentBeats);
 
-    	if (currentBeats < 2) {
-			BeatCircle newBeatCircle = beatCirclePool.newObject();
-			newBeatCircle.setLocation(640, 300, 100);
-			inGameBeatCircles.add(newBeatCircle);
-			
-			BeatCircle newBeatCircle2 = beatCirclePool.newObject();
-			newBeatCircle2.setLocation(640, 600, 100);
-			inGameBeatCircles.add(newBeatCircle2);
+    	if (currentBeats < 1) {
+//			BeatCircle newBeatCircle = beatCirclePool.newObject();
+//			newBeatCircle.setInitialization(640, 300);
+//			inGameBeatCircles.add(newBeatCircle);
+//			
+//			
+//			BeatCircle newBeatCircle2 = beatCirclePool.newObject();
+//			newBeatCircle2.setInitialization(640, 600);
+//			inGameBeatCircles.add(newBeatCircle2);
 			
 			DragCircle dragCircle = dragCirclePool.newObject();
-			dragCircle.setLocation(1000, 300, 100);
-			dragCircle.setDrag(100);
+			dragCircle.setInitialization(1000, 300, 100);
 			inGameBeatCircles.add(dragCircle);
 
     	}

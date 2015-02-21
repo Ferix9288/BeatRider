@@ -1,7 +1,11 @@
 package com.example.beatrider;
 
+import java.util.ArrayList;
+import java.util.Random;
+
 import android.graphics.Color;
 import android.graphics.Paint.Style;
+import android.graphics.Point;
 import android.util.Log;
 
 import com.kilobolt.framework.Graphics;
@@ -10,24 +14,63 @@ import com.kilobolt.framework.Input.TouchEvent;
 public class DragCircle extends BeatCircle {
 
 	static final int DRAG = 3;
-	static final int DRAG_INCREMENT = 2;
+	static final int DRAG_DIVIDER = 5;
+	static final int DRAG_INCREMENT = 20;
 	
 	static final int DRAG_RESILIENCE = 5;
 	
+	
 	//Additional Instance Variables
-	float dragDuration;
+	float dragUserDuration;
 	float dragTotalTime;
+	
 	int resilience;
 	
+	ArrayList<Point> dragUserPath = new ArrayList<Point>();
+	ArrayList<Point> dragTemplatePath = new ArrayList<Point>();
+	int dragIndex;
+
+	
 	public DragCircle() {
-		
+		super();
 	}
 	
-	void setDrag(float dragTotal) {
-		this.dragDuration = 0;
+	public DragCircle(int x, int y, float dragTotal) {
+		setInitialization(x, y, dragTotal);		
+	}
+	
+	void setInitialization(int x, int y, float dragTotal) {
+		super.setInitialization(x, y);
+		this.dragUserDuration = 0;
 		this.dragTotalTime = dragTotal;
 		this.resilience = 0;
 		
+		dragUserPath.clear();
+		dragTemplatePath.clear();
+		dragIndex = 0;
+		
+		createDragPath();				
+	}
+	
+	void createDragPath() {
+		Random r = new Random();
+		int previousX = startingX; 
+		int previousY = startingY;
+		for (int i = DRAG_DIVIDER; i < (int) this.dragTotalTime; i+= DRAG_DIVIDER) {
+			float sign = r.nextFloat();
+			if (sign <= 0.5) {
+				sign = -1;
+			} else {
+				sign = 1;
+			}
+			
+			int randomYIncrement = (int) ( (r.nextInt(5) + 3) * sign);
+			previousX = previousX + DRAG_INCREMENT;
+			previousY = previousY + randomYIncrement;
+			Point newPoint = new Point(previousX, previousY);
+			dragTemplatePath.add(newPoint);
+		}
+
 	}
 	
 	@Override
@@ -35,16 +78,16 @@ public class DragCircle extends BeatCircle {
 		
 		switch(this.state) {
 			case ON: {
-				g.drawCircle(this.xLocation, this.yLocation, this.radius, Color.RED,  Style.STROKE);
+				g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, Color.RED,  Style.STROKE);
 				drawTimeArc(g);
-				drawDragPath(g);
+				drawdragTemplatePath(g);
 				break;
 				//else time runs out
 			}
 			
 			case DRAG: {
-				g.drawCircle(this.xLocation, this.yLocation, this.radius, Color.RED,  Style.STROKE);
-				drawDragPath(g);
+				g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, Color.RED,  Style.STROKE);
+				drawdragTemplatePath(g);
 				break;
 			}
 			
@@ -59,10 +102,21 @@ public class DragCircle extends BeatCircle {
 		} //end switch
 	}
 	
-	void drawDragPath(Graphics g) {
-		for (int i = DRAG_INCREMENT; i < (int) this.dragTotalTime; i+= DRAG_INCREMENT) {
-			g.drawCircle(this.startingX+i, this.startingY+i, this.radius, 0x3000FFFF,  Style.STROKE);
+	void drawdragTemplatePath(Graphics g) {
+		paint.setStrokeWidth(1);
+		for (int i = 0; i < dragTemplatePath.size()-1; i++) {
+			Point p = dragTemplatePath.get(i);
+			g.drawCircle(p.x, p.y, CIRCLE_RADIUS, 0x30FFFF00,  Style.STROKE);
 		}
+		//Draw Very Last One Differently
+
+		Point lastPoint = dragTemplatePath.get(dragTemplatePath.size()-1);
+		paint.setStyle(Style.STROKE);
+		paint.setStrokeWidth(5);
+		paint.setColor(Color.YELLOW);
+        g.drawArc(lastPoint.x - CIRCLE_RADIUS, lastPoint.y - CIRCLE_RADIUS, 
+        		lastPoint.x + CIRCLE_RADIUS, lastPoint.y + CIRCLE_RADIUS, -90, 360, true, paint);		
+
 	}
 	
 	@Override
@@ -90,21 +144,31 @@ public class DragCircle extends BeatCircle {
 			}
 			
 			case DRAG: {
-				if (e != null) {
-					if (DEBUG) Log.i(TAG, "In State Drag: " + e.toString());
-					if (isTouched(e.x, e.y)) {
+				if (dragUserDuration > dragTotalTime) {
+					if (DEBUG) Log.i(TAG, "In State Drag: Expired Drag.");
+					if (e != null) { //User still dragging
+						rating = GameUtil.Rating.Miss;
+					} else { //User correctly let go
+						setDragRating();
+					}
+					this.state = RATING;
+				} 	else {
+					dragUserDuration += deltaTime;
+					updateLocation();
+					if (e != null && isTouched(e.x, e.y)) {
+						if (DEBUG) Log.i(TAG, "In State Drag: Touched.");
 						this.resilience = 0;
-						if (DEBUG) Log.i(TAG, "Touched: " + this.lifeSpan);
-						updateLocation(e.x, e.y);
-					} 
-				} else {
-					if (DEBUG) Log.i(TAG, "In State Drag: Null Event.");
-					if (this.resilience > DRAG_RESILIENCE) {
-						this.state = RATING;
-					}  else {
-						this.resilience++;
+					} else {
+						if (DEBUG) Log.i(TAG, "In State Drag: Null Event.");
+						if (this.resilience > DRAG_RESILIENCE) {
+							setDragRating();
+							this.state = RATING;
+						} 
+						this.resilience++;		
 					}
 				}
+				
+
 			}
 			
 			case RATING: {
@@ -124,14 +188,42 @@ public class DragCircle extends BeatCircle {
 		} //end switch
 	}
 	
-	void updateLocation(int x, int y) {
-		this.xLocation = x;
-		this.yLocation = y;
+	void setDragRating() {
+		float DRAG_OK_TIMING = dragTotalTime*.6f;
+		float DRAG_GOOD_TIMING = dragTotalTime*.8f;
+		float DRAG_PERFECT_TIMING = dragTotalTime*.95f;
 		
-		this.xLeft = x - radius;
-		this.xRight = x + radius;
-		this.yDown = y + radius;
-		this.yUp = y - radius;
+		if (dragUserDuration >= DRAG_PERFECT_TIMING) {
+			rating = GameUtil.Rating.Perfect;
+		} else if (dragUserDuration >= DRAG_GOOD_TIMING) {
+			rating = GameUtil.Rating.Good;
+		} else if (dragUserDuration >= DRAG_OK_TIMING) {
+			rating = GameUtil.Rating.Ok;
+		} else {
+			rating = GameUtil.Rating.Bad;
+		}		
+	}
+	
+	void updateLocation() {
+
+		//dragIndex = (int) (dragUserDuration / dragTotalTime)*dragTemplatePath.size();
+		dragIndex = (int) (dragUserDuration / DRAG_DIVIDER);
+		if (DEBUG) Log.i(TAG, "Update Location: dragUserDuration - " + dragUserDuration
+				+ "||| dragIndex -" + dragIndex);
+		if (dragIndex >= dragTemplatePath.size()) {
+			dragIndex = dragTemplatePath.size() -1;
+		}
+		
+		Point p = dragTemplatePath.get(dragIndex);
+		
+		this.xLocation = p.x;
+		this.yLocation = p.y;
+		
+		this.xLeft = p.x - CIRCLE_RADIUS;
+		this.xRight = p.x + CIRCLE_RADIUS;
+		this.yDown = p.y + CIRCLE_RADIUS;
+		this.yUp = p.y - CIRCLE_RADIUS;
+		
 	}
 
 }

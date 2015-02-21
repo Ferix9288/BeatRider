@@ -21,10 +21,11 @@ public class BeatCircle extends GameObject {
 	static final float LENIENCY = 10;
 	static final float ON_DURATION = 200; //2 seconds
 	
-
 	static final float OK_TIMING = ON_DURATION*.6f;
 	static final float GOOD_TIMING = ON_DURATION*.8f;
 	static final float PERFECT_TIMING = ON_DURATION*.95f;
+	
+	static final int CIRCLE_RADIUS = 100;
 	
 	protected static final boolean DEBUG = true;
 	protected static final String TAG = "Beat Circle";
@@ -53,30 +54,32 @@ public class BeatCircle extends GameObject {
         this.paint.setColor(Color.WHITE);        
 	}
 	
-	void setLocation(int x, int y, int radius) {
+	public BeatCircle(int x, int y) {
+		setInitialization(x,y);
+	}
+	
+	void setInitialization(int x, int y) {
 		this.startingX = x;
 		this.startingY = y;
 		this.xLocation = x;
 		this.yLocation = y;
 		
-		this.radius = radius;
-
-		this.xLeft = x - radius;
-		this.xRight = x + radius;
-		this.yDown = y + radius;
-		this.yUp = y - radius;
+		this.xLeft = x - CIRCLE_RADIUS;
+		this.xRight = x + CIRCLE_RADIUS;
+		this.yDown = y + CIRCLE_RADIUS;
+		this.yUp = y - CIRCLE_RADIUS;
 		
 		this.state = ON;
 		this.lifeSpan = 0;
 		this.wordLifeSpan = 0;
 		this.alpha = 0xFF;
 	}
-	
+		
 	void draw(Graphics g) {
 		
 		switch(this.state) {
 			case ON: {
-				g.drawCircle(this.xLocation, this.yLocation, this.radius, Color.RED,  Style.STROKE);
+				g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, Color.RED,  Style.STROKE);
 				drawTimeArc(g);
 				break;
 				//else time runs out
@@ -104,7 +107,8 @@ public class BeatCircle extends GameObject {
 	void drawRating(Graphics g) {
 		alpha = 0xF0 - (0xF0/FLOAT_TIME)*this.wordLifeSpan;
 		this.paint.setAlpha(alpha);	
-        this.paint.setStrokeWidth(1);				
+        this.paint.setStrokeWidth(1);	
+        this.paint.setStyle(Style.FILL_AND_STROKE);
         
 		switch (this.rating) {
 			case Miss:
