@@ -94,10 +94,13 @@ public class GameScreen extends Screen {
 
     @Override
     public void update(float deltaTime) {
+    	Log.i(TAG, "In Update - " + "deltaTime - " + deltaTime
+    			+ " || systemTime - " + + System.nanoTime() );
+    	
         List<TouchEvent> touchEvents = game.getInput().getTouchEvents();
 
         // We have four separate update methods in this example.
-        // Depending on the state of the game, we call different update methods.
+        // Depending on the state of the game, we call differe5nnt update methods.
         // Refer to Unit 3's code. We did a similar thing without separating the
         // update methods.
 
@@ -139,11 +142,11 @@ public class GameScreen extends Screen {
 //			newBeatCircle.setInitialization(640, 300);
 //			inGameBeatCircles.add(newBeatCircle);
 //			
-//			
+			
 //			BeatCircle newBeatCircle2 = beatCirclePool.newObject();
 //			newBeatCircle2.setInitialization(640, 600);
 //			inGameBeatCircles.add(newBeatCircle2);
-			
+//			
 			DragCircle dragCircle = dragCirclePool.newObject();
 			dragCircle.setInitialization(1000, 300, 100);
 			inGameBeatCircles.add(dragCircle);
@@ -159,18 +162,18 @@ public class GameScreen extends Screen {
         
         int len = touchEvents.size();
         if (len == 0) {
-            if (DEBUG) Log.i(TAG, "updateRunning: Null Touch Events");
+            if (DEBUG) Log.i(TAG, "updateRunning: Null Touch Events - " + deltaTime);
 
             for (int j = 0; j < inGameBeatCircles.size(); j++) {
             	BeatCircle beatCircle = inGameBeatCircles.get(j);
-            	beatCircle.update(null, deltaTime);
+            	beatCircle.update(null);
             	if (beatCircle.isDone()) {
             		inGameBeatCircles.remove(j);
             		report.missCounter ++;
             	}
             }  	
         } else {
-            if (DEBUG) Log.i(TAG, "updateRunning: touchEvents" + touchEvents);
+            if (DEBUG) Log.i(TAG, "updateRunning: Time - " + deltaTime + "|touchEvents -" + touchEvents);
 
 	        for (int i = 0; i < len; i++) {
 	            TouchEvent event = touchEvents.get(i);
@@ -178,7 +181,7 @@ public class GameScreen extends Screen {
 	            //Update Beat Circles
 	            for (int j = 0; j < inGameBeatCircles.size(); j++) {
 	            	BeatCircle beatCircle = inGameBeatCircles.get(j);
-	            	beatCircle.update(event, deltaTime);
+	            	beatCircle.update(event);
 	            	if (beatCircle.isDone()) {
 	            		inGameBeatCircles.remove(j);
 	            		switch(beatCircle.rating) {
@@ -288,7 +291,7 @@ public class GameScreen extends Screen {
         
         if (state == GameState.Running) {
             drawRunningUI();
-        	drawRunning();
+        	drawRunning(deltaTime);
         }
         
         if (state == GameState.Paused) {
@@ -324,11 +327,11 @@ public class GameScreen extends Screen {
                 game.getGraphics().getWidth() - 50, game.getGraphics().getHeight() - 10, paint);        
     }
     
-    private void drawRunning() {
+    private void drawRunning(float deltaTime) {
     	int size = inGameBeatCircles.size();
     	for (int i = 0; i < size; i++ ) {
     		BeatCircle currentBeatCircle = inGameBeatCircles.get(i);
-    		currentBeatCircle.draw(game.getGraphics());
+    		currentBeatCircle.draw(game.getGraphics(), deltaTime);
     	}
     }
 

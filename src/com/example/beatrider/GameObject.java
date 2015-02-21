@@ -8,7 +8,7 @@ import com.kilobolt.framework.Input.TouchEvent;
 
 public abstract class GameObject {
 	
-	abstract void draw(Graphics g);
-	abstract void update(TouchEvent e, float deltaTime);
+	abstract void draw(Graphics g, float deltaTime);
+	abstract void update(TouchEvent e);
 	
 }

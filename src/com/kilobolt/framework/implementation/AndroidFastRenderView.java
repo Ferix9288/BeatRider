@@ -3,11 +3,16 @@ package com.kilobolt.framework.implementation;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.os.SystemClock;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 public class AndroidFastRenderView extends SurfaceView implements Runnable {
-    AndroidGame game;
+    private static final boolean DEBUG = false;
+	private static final String TAG = "Android Fast Render";
+
+	AndroidGame game;
     Bitmap framebuffer;
     Thread renderThread = null;
     SurfaceHolder holder;
@@ -24,6 +29,8 @@ public class AndroidFastRenderView extends SurfaceView implements Runnable {
     public void resume() { 
         running = true;
         renderThread = new Thread(this);
+        		
+        if (DEBUG) Log.i(TAG, "Launched Thread.");
         renderThread.start();   
 
     }      
@@ -32,18 +39,21 @@ public class AndroidFastRenderView extends SurfaceView implements Runnable {
         Rect dstRect = new Rect();
         long startTime = System.nanoTime();
         while(running) {  
+        	
             if(!holder.getSurface().isValid())
                 continue;           
-            
-
+              
             float deltaTime = (System.nanoTime() - startTime) / 10000000.000f;
+            
             startTime = System.nanoTime();
+            
+            if (DEBUG) Log.i(TAG, "Delta Time - " + deltaTime
+            		+ "|| startTime - " + startTime);
             
             if (deltaTime > 3.15){
             	deltaTime = (float) 3.15;
            }
-     
-
+                        
             game.getCurrentScreen().update(deltaTime);
             game.getCurrentScreen().paint(deltaTime);
           
@@ -51,7 +61,6 @@ public class AndroidFastRenderView extends SurfaceView implements Runnable {
             canvas.getClipBounds(dstRect);
             canvas.drawBitmap(framebuffer, null, dstRect, null);                           
             holder.unlockCanvasAndPost(canvas);
-            
             
         }
     }

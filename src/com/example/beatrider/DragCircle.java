@@ -19,6 +19,7 @@ public class DragCircle extends BeatCircle {
 	
 	static final int DRAG_RESILIENCE = 5;
 	
+	static final boolean DEBUG = false;
 	
 	//Additional Instance Variables
 	float dragUserDuration;
@@ -74,10 +75,11 @@ public class DragCircle extends BeatCircle {
 	}
 	
 	@Override
-	void draw(Graphics g) {
+	void draw(Graphics g, float deltaTime) {
 		
 		switch(this.state) {
 			case ON: {
+				lifeSpan += deltaTime;
 				g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, Color.RED,  Style.STROKE);
 				drawTimeArc(g);
 				drawDragTemplatePath(g);
@@ -86,6 +88,7 @@ public class DragCircle extends BeatCircle {
 			}
 			
 			case DRAG: {
+				dragUserDuration += deltaTime;
 				drawDragCircle(g);
 				drawDragTemplatePath(g);
 				drawUserDragPath(g);
@@ -136,17 +139,20 @@ public class DragCircle extends BeatCircle {
 	}
 	
 	@Override
-	void update(TouchEvent e, float deltaTime) {
+	void update(TouchEvent e) {
+		
+//		Log.i(TAG, "DeltaTime - " + deltaTime 
+//				+ "LifeSpan: " + this.lifeSpan);
+
 		switch(this.state) {
 			case ON: {
-				lifeSpan += deltaTime;
 				
 				if (lifeSpan > ON_DURATION + LENIENCY){
 					rating = GameUtil.Rating.Miss;
 					this.state = RATING;
 				} else if (e != null) {
 					if (isTouched(e.x, e.y)) {
-						if (DEBUG) Log.i(TAG, "Touched: " + this.lifeSpan);
+						//if (DEBUG) Log.i(TAG, "Touched: " + this.lifeSpan);
 						setRating();
 						if (this.rating == GameUtil.Rating.Good || this.rating == GameUtil.Rating.Perfect) {
 							this.state = DRAG;
@@ -169,7 +175,6 @@ public class DragCircle extends BeatCircle {
 					}
 					this.state = RATING;
 				} 	else {
-					dragUserDuration += deltaTime;
 					updateLocation();
 					if (e != null && isTouched(e.x, e.y)) {
 						if (DEBUG) Log.i(TAG, "In State Drag: Touched.");

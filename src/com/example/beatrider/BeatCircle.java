@@ -75,10 +75,12 @@ public class BeatCircle extends GameObject {
 		this.alpha = 0xFF;
 	}
 		
-	void draw(Graphics g) {
+	@Override
+	void draw(Graphics g, float deltaTime) {
 		
 		switch(this.state) {
 			case ON: {
+				lifeSpan += deltaTime;
 				g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, Color.RED,  Style.STROKE);
 				drawTimeArc(g);
 				break;
@@ -137,10 +139,9 @@ public class BeatCircle extends GameObject {
 		}
 	}
 	
-	void update(TouchEvent e, float deltaTime) {
+	void update(TouchEvent e) {
 		switch(this.state) {
 			case ON: {
-				lifeSpan += deltaTime;
 				
 				if (lifeSpan > ON_DURATION + LENIENCY){
 					rating = GameUtil.Rating.Miss;
