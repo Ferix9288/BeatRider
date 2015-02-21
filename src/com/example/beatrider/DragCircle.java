@@ -80,14 +80,15 @@ public class DragCircle extends BeatCircle {
 			case ON: {
 				g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, Color.RED,  Style.STROKE);
 				drawTimeArc(g);
-				drawdragTemplatePath(g);
+				drawDragTemplatePath(g);
 				break;
 				//else time runs out
 			}
 			
 			case DRAG: {
-				g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, Color.RED,  Style.STROKE);
-				drawdragTemplatePath(g);
+				drawDragCircle(g);
+				drawDragTemplatePath(g);
+				drawUserDragPath(g);
 				break;
 			}
 			
@@ -102,14 +103,21 @@ public class DragCircle extends BeatCircle {
 		} //end switch
 	}
 	
-	void drawdragTemplatePath(Graphics g) {
+	void drawDragCircle(Graphics g) {
+		paint.setColor(Color.RED);
+		paint.setStrokeWidth(5);
+		 g.drawArc(this.xLocation - CIRCLE_RADIUS, this.yLocation - CIRCLE_RADIUS, 
+				 this.xLocation + CIRCLE_RADIUS, this.yLocation + CIRCLE_RADIUS, -90, 360, true, paint);		
+
+	}
+	
+	void drawDragTemplatePath(Graphics g) {
 		paint.setStrokeWidth(1);
-		for (int i = 0; i < dragTemplatePath.size()-1; i++) {
+		for (int i = dragIndex; i < dragTemplatePath.size()-1; i++) {
 			Point p = dragTemplatePath.get(i);
 			g.drawCircle(p.x, p.y, CIRCLE_RADIUS, 0x30FFFF00,  Style.STROKE);
 		}
 		//Draw Very Last One Differently
-
 		Point lastPoint = dragTemplatePath.get(dragTemplatePath.size()-1);
 		paint.setStyle(Style.STROKE);
 		paint.setStrokeWidth(5);
@@ -117,6 +125,14 @@ public class DragCircle extends BeatCircle {
         g.drawArc(lastPoint.x - CIRCLE_RADIUS, lastPoint.y - CIRCLE_RADIUS, 
         		lastPoint.x + CIRCLE_RADIUS, lastPoint.y + CIRCLE_RADIUS, -90, 360, true, paint);		
 
+	}
+	
+	void drawUserDragPath(Graphics g) {
+		paint.setStrokeWidth(1);
+		for (int i = 0; i < dragIndex; i++) {
+			Point p = dragTemplatePath.get(i);
+			g.drawCircle(p.x, p.y, CIRCLE_RADIUS, 0x50FFFF00,  Style.STROKE);
+		}
 	}
 	
 	@Override
