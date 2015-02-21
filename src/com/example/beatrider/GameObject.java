@@ -1,7 +1,5 @@
 package com.example.beatrider;
 
-import android.graphics.Paint;
-
 import com.kilobolt.framework.Graphics;
 import com.kilobolt.framework.Input.TouchEvent;
 

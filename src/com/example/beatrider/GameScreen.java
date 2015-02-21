@@ -1,19 +1,14 @@
 package com.example.beatrider;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.util.Log;
-import android.util.Range;
 
 import com.kilobolt.framework.Game;
 import com.kilobolt.framework.Graphics;
@@ -47,9 +42,14 @@ public class GameScreen extends Screen {
      * Drag Circle Factory.
      */
     static Pool<DragCircle> dragCirclePool;
-	List<DragCircle> inGameDragCircles = new ArrayList<DragCircle>();
 	static PoolObjectFactory<DragCircle> dragCircleFactory;
-	
+
+    /** 
+     * Tap Circle Factory.
+     */
+    static Pool<TapCircle> tapCirclePool;
+	static PoolObjectFactory<TapCircle> tapCircleFactory;
+
 	static {
 		beatCircleFactory = new PoolObjectFactory<BeatCircle>() {
             @Override
@@ -69,6 +69,15 @@ public class GameScreen extends Screen {
         };
         
         dragCirclePool = new Pool<DragCircle>(dragCircleFactory, 50);
+        
+        tapCircleFactory = new PoolObjectFactory<TapCircle>() {
+            public TapCircle createObject() {
+                return new TapCircle();
+            }            
+            
+        };
+        
+        tapCirclePool = new Pool<TapCircle>(tapCircleFactory, 50);
 	}
 	
     // Variable Setup
@@ -94,8 +103,6 @@ public class GameScreen extends Screen {
 
     @Override
     public void update(float deltaTime) {
-    	Log.i(TAG, "In Update - " + "deltaTime - " + deltaTime
-    			+ " || systemTime - " + + System.nanoTime() );
     	
         List<TouchEvent> touchEvents = game.getInput().getTouchEvents();
 
@@ -141,15 +148,18 @@ public class GameScreen extends Screen {
 //			BeatCircle newBeatCircle = beatCirclePool.newObject();
 //			newBeatCircle.setInitialization(640, 300);
 //			inGameBeatCircles.add(newBeatCircle);
-//			
 			
 //			BeatCircle newBeatCircle2 = beatCirclePool.newObject();
 //			newBeatCircle2.setInitialization(640, 600);
 //			inGameBeatCircles.add(newBeatCircle2);
-//			
-			DragCircle dragCircle = dragCirclePool.newObject();
-			dragCircle.setInitialization(1000, 300, 100);
-			inGameBeatCircles.add(dragCircle);
+    		
+//			DragCircle dragCircle = dragCirclePool.newObject();
+//			dragCircle.setInitialization(1000, 300, 100);
+//			inGameBeatCircles.add(dragCircle);
+
+			TapCircle tapCircle = tapCirclePool.newObject();
+			tapCircle.setInitialization(640, 600, 100, 5);
+			inGameBeatCircles.add(tapCircle);
 
     	}
     }

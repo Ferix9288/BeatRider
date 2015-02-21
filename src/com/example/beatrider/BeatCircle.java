@@ -4,7 +4,6 @@ package com.example.beatrider;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
-import android.graphics.PathEffect;
 import android.util.Log;
 
 import com.example.beatrider.GameUtil.Rating;
@@ -26,6 +25,7 @@ public class BeatCircle extends GameObject {
 	static final float PERFECT_TIMING = ON_DURATION*.95f;
 	
 	static final int CIRCLE_RADIUS = 100;
+	static final int TIME_ARC_DIST = 20;
 	
 	protected static final boolean DEBUG = true;
 	protected static final String TAG = "Beat Circle";
@@ -103,11 +103,14 @@ public class BeatCircle extends GameObject {
         this.paint.setColor(Color.YELLOW);        
         this.paint.setStyle(Style.STROKE);
         this.paint.setStrokeWidth(10);
-        g.drawArc(xLeft-20, yUp-20, xRight+20, yDown+20, -90, sweepAngle, true, paint);		
+        g.drawArc(xLeft-TIME_ARC_DIST, yUp-TIME_ARC_DIST, 
+        		xRight+TIME_ARC_DIST, yDown+TIME_ARC_DIST, -90, sweepAngle, true, paint);		
 	}
 	
 	void drawRating(Graphics g) {
 		alpha = 0xF0 - (0xF0/FLOAT_TIME)*this.wordLifeSpan;
+		this.paint.setTextSize(50);
+        this.paint.setTextAlign(Paint.Align.CENTER);
 		this.paint.setAlpha(alpha);	
         this.paint.setStrokeWidth(1);	
         this.paint.setStyle(Style.FILL_AND_STROKE);
@@ -126,7 +129,7 @@ public class BeatCircle extends GameObject {
 				g.drawString("Ok!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
 				break;						
 			case Good:
-				paint.setARGB(alpha, 0x00, 0x00, 0xFF); //Blue
+				paint.setARGB(alpha, 0xAD, 0xFF, 0x2F); //Green Yellow
 				g.drawString("Good!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
 				break;
 			case Perfect:
