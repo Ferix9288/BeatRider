@@ -26,12 +26,13 @@ public class BeatCircle extends GameObject {
 	static final float GOOD_TIMING = ON_DURATION*.8f;
 	static final float PERFECT_TIMING = ON_DURATION*.95f;
 	
-	private static final boolean DEBUG = true;
-	private static final String TAG = "Beat Circle";
+	protected static final boolean DEBUG = true;
+	protected static final String TAG = "Beat Circle";
 	
 	//Instance variables
 	int xLocation, yLocation, radius;
 	int xLeft, xRight, yDown, yUp; //Hitbox
+	int startingX, startingY;
 	int state;
 	Rating rating;
 	int wordLifeSpan;
@@ -53,8 +54,11 @@ public class BeatCircle extends GameObject {
 	}
 	
 	void setLocation(int x, int y, int radius) {
+		this.startingX = x;
+		this.startingY = y;
 		this.xLocation = x;
 		this.yLocation = y;
+		
 		this.radius = radius;
 
 		this.xLeft = x - radius;
@@ -69,57 +73,17 @@ public class BeatCircle extends GameObject {
 	}
 	
 	void draw(Graphics g) {
-		int color = 0xFFFF0000; //Alpha = 0xFF; Red = 0xFF
 		
 		switch(this.state) {
 			case ON: {
-				g.drawCircle(this.xLocation, this.yLocation, this.radius, color,  Style.STROKE);
-				float sweepAngle = 360 * (lifeSpan/ON_DURATION);
-//		        this.paint.setColor(Color.WHITE);    
-//		        this.paint.setStyle(Style.FILL);        
-//		        this.paint.setStrokeWidth(1);
-//
-//				g.drawArc(xLeft, yUp, xRight, yDown, -90, sweepAngle, true, paint);
-		        this.paint.setColor(Color.YELLOW);        
-		        this.paint.setStyle(Style.STROKE);
-		        this.paint.setStrokeWidth(10);
-		        g.drawArc(xLeft-20, yUp-20, xRight+20, yDown+20, -90, sweepAngle, true, paint);
+				g.drawCircle(this.xLocation, this.yLocation, this.radius, Color.RED,  Style.STROKE);
+				drawTimeArc(g);
 				break;
 				//else time runs out
 			}
 			
 			case RATING: {
-				
-				alpha = 0xF0 - (0xF0/FLOAT_TIME)*this.wordLifeSpan;
-				this.paint.setAlpha(alpha);	
-		        this.paint.setStrokeWidth(1);				
-		        
-				switch (this.rating) {
-					case Miss:
-						paint.setARGB(alpha, 0xFF, 0x00, 0x00); //Red        
-						g.drawString("Miss!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
-						break;
-					case Bad:
-						paint.setARGB(alpha, 0xFF, 0x00, 0xFF); //Magenta        
-						g.drawString("Bad!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
-						break;
-					case Ok:
-						paint.setARGB(alpha, 0x00, 0xFF, 0xFF); //Cyan
-						g.drawString("Ok!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
-						break;						
-					case Good:
-						paint.setARGB(alpha, 0x00, 0x00, 0xFF); //Blue
-						g.drawString("Good!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
-						break;
-					case Perfect:
-				        this.paint.setColor(Color.GREEN);
-				        paint.setARGB(alpha, 0x00, 0xFF, 0x00); //Green
-						g.drawString("Perfect!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
-						break;
-					default:
-						break;
-				} //end switch
-							
+				drawRating(g);							
 				break;
 			}
 			
@@ -127,6 +91,46 @@ public class BeatCircle extends GameObject {
 				break;
 			}
 		} //end switch
+	}
+	
+	void drawTimeArc(Graphics g) {
+		float sweepAngle = 360 * (lifeSpan/ON_DURATION);
+        this.paint.setColor(Color.YELLOW);        
+        this.paint.setStyle(Style.STROKE);
+        this.paint.setStrokeWidth(10);
+        g.drawArc(xLeft-20, yUp-20, xRight+20, yDown+20, -90, sweepAngle, true, paint);		
+	}
+	
+	void drawRating(Graphics g) {
+		alpha = 0xF0 - (0xF0/FLOAT_TIME)*this.wordLifeSpan;
+		this.paint.setAlpha(alpha);	
+        this.paint.setStrokeWidth(1);				
+        
+		switch (this.rating) {
+			case Miss:
+				paint.setARGB(alpha, 0xFF, 0x00, 0x00); //Red        
+				g.drawString("Miss!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
+				break;
+			case Bad:
+				paint.setARGB(alpha, 0xFF, 0x00, 0xFF); //Magenta        
+				g.drawString("Bad!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
+				break;
+			case Ok:
+				paint.setARGB(alpha, 0x00, 0xFF, 0xFF); //Cyan
+				g.drawString("Ok!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
+				break;						
+			case Good:
+				paint.setARGB(alpha, 0x00, 0x00, 0xFF); //Blue
+				g.drawString("Good!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
+				break;
+			case Perfect:
+		        this.paint.setColor(Color.GREEN);
+		        paint.setARGB(alpha, 0x00, 0xFF, 0x00); //Green
+				g.drawString("Perfect!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
+				break;
+			default:
+				break;
+		}
 	}
 	
 	void update(TouchEvent e, float deltaTime) {
@@ -140,17 +144,7 @@ public class BeatCircle extends GameObject {
 				} else if (e != null) {
 					if (isTouched(e.x, e.y)) {
 						if (DEBUG) Log.i(TAG, "Touched: " + this.lifeSpan);
-
-						if (lifeSpan >= PERFECT_TIMING) {
-							rating = GameUtil.Rating.Perfect;
-						} else if (lifeSpan >= GOOD_TIMING) {
-							rating = GameUtil.Rating.Good;
-						} else if (lifeSpan >= OK_TIMING) {
-							rating = GameUtil.Rating.Ok;
-						} else {
-							rating = GameUtil.Rating.Bad;
-						}
-						
+						setRating();						
 						this.state = RATING;
 					} 
 				} 			
@@ -174,6 +168,18 @@ public class BeatCircle extends GameObject {
 						
 		} //end switch
 		
+	}
+	
+	void setRating() {
+		if (lifeSpan >= PERFECT_TIMING) {
+			rating = GameUtil.Rating.Perfect;
+		} else if (lifeSpan >= GOOD_TIMING) {
+			rating = GameUtil.Rating.Good;
+		} else if (lifeSpan >= OK_TIMING) {
+			rating = GameUtil.Rating.Ok;
+		} else {
+			rating = GameUtil.Rating.Bad;
+		}
 	}
 	
 	/**

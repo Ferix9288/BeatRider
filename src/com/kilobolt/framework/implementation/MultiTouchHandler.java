@@ -3,6 +3,7 @@ package com.kilobolt.framework.implementation;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -12,6 +13,10 @@ import com.kilobolt.framework.Pool.PoolObjectFactory;
 
 public class MultiTouchHandler implements TouchHandler {
 	private static final int MAX_TOUCHPOINTS = 10;
+
+	private static final boolean DEBUG = false;
+
+	private static final String TAG = "Multi Touch";
 	
 	boolean[] isTouched = new boolean[MAX_TOUCHPOINTS];
 	int[] touchX = new int[MAX_TOUCHPOINTS];
@@ -44,6 +49,8 @@ public class MultiTouchHandler implements TouchHandler {
 			int pointerIndex = (event.getAction() & MotionEvent.ACTION_POINTER_ID_MASK) >> MotionEvent.ACTION_POINTER_ID_SHIFT;
 			int pointerCount = event.getPointerCount();
 			TouchEvent touchEvent;
+			if (DEBUG) Log.i(TAG, "Pointer ID: " + pointerIndex + " | Pointer Count:" + pointerCount);
+
 			for (int i = 0; i < MAX_TOUCHPOINTS; i++) {
 				if (i >= pointerCount) {
 					isTouched[i] = false;

@@ -41,19 +41,33 @@ public class GameScreen extends Screen {
      */
     static Pool<BeatCircle> beatCirclePool;
 	List<BeatCircle> inGameBeatCircles = new ArrayList<BeatCircle>();
-	List<BeatCircle> beatCirclesBuffer = new ArrayList<BeatCircle>();
+	static PoolObjectFactory<BeatCircle> beatCircleFactory;
 
-	static PoolObjectFactory<BeatCircle> factory;
+    /** 
+     * Drag Circle Factory.
+     */
+    static Pool<DragCircle> dragCirclePool;
+	List<DragCircle> inGameDragCircles = new ArrayList<DragCircle>();
+	static PoolObjectFactory<DragCircle> dragCircleFactory;
 	
 	static {
-		factory = new PoolObjectFactory<BeatCircle>() {
+		beatCircleFactory = new PoolObjectFactory<BeatCircle>() {
             @Override
             public BeatCircle createObject() {
                 return new BeatCircle();
             }            
         };
         
-        beatCirclePool = new Pool<BeatCircle>(factory, 50);
+        beatCirclePool = new Pool<BeatCircle>(beatCircleFactory, 50);
+        
+        dragCircleFactory = new PoolObjectFactory<DragCircle>() {
+            @Override
+            public DragCircle createObject() {
+                return new DragCircle();
+            }            
+        };
+        
+        dragCirclePool = new Pool<DragCircle>(dragCircleFactory, 50);
 	}
 	
     // Variable Setup
@@ -119,22 +133,33 @@ public class GameScreen extends Screen {
     	int currentBeats = inGameBeatCircles.size();
     	//if (DEBUG) Log.i(TAG, "generateBeats:" + currentBeats);
 
-    	if (currentBeats < 1) {
+    	if (currentBeats < 2) {
 			BeatCircle newBeatCircle = beatCirclePool.newObject();
 			newBeatCircle.setLocation(640, 300, 100);
 			inGameBeatCircles.add(newBeatCircle);
+			
+			BeatCircle newBeatCircle2 = beatCirclePool.newObject();
+			newBeatCircle2.setLocation(640, 600, 100);
+			inGameBeatCircles.add(newBeatCircle2);
+			
+			DragCircle dragCircle = dragCirclePool.newObject();
+			dragCircle.setLocation(1000, 300, 100);
+			dragCircle.setDrag(100);
+			inGameBeatCircles.add(dragCircle);
+
     	}
     }
     private void updateRunning(List<TouchEvent> touchEvents, float deltaTime) {
         
         //This is identical to the update() method from our Unit 2/3 game.
         
-        if (DEBUG) Log.i(TAG, "updateRunning: touchEvents" + touchEvents);
         
     	// 1. All touch input is handled here:
         
         int len = touchEvents.size();
         if (len == 0) {
+            if (DEBUG) Log.i(TAG, "updateRunning: Null Touch Events");
+
             for (int j = 0; j < inGameBeatCircles.size(); j++) {
             	BeatCircle beatCircle = inGameBeatCircles.get(j);
             	beatCircle.update(null, deltaTime);
@@ -144,6 +169,8 @@ public class GameScreen extends Screen {
             	}
             }  	
         } else {
+            if (DEBUG) Log.i(TAG, "updateRunning: touchEvents" + touchEvents);
+
 	        for (int i = 0; i < len; i++) {
 	            TouchEvent event = touchEvents.get(i);
 	            
