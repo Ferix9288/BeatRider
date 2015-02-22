@@ -24,7 +24,7 @@ public class DragCircle extends BeatCircle {
 	//Additional Instance Variables
 	float dragUserDuration;
 	float dragTotalTime;
-	
+	int dragPointer;
 	int resilience;
 	
 	ArrayList<Point> dragUserPath = new ArrayList<Point>();
@@ -159,11 +159,12 @@ public class DragCircle extends BeatCircle {
 				if (lifeSpan > ON_DURATION + LENIENCY){
 					rating = GameUtil.Rating.Miss;
 					this.state = RATING;
-				} else if (e != null) {
+				} else if (e != null && e.type == TouchEvent.TOUCH_DOWN) {
 					if (isTouched(e.x, e.y)) {
 						//if (DEBUG) Log.i(TAG, "Touched: " + this.lifeSpan);
 						setRating();
 						if (this.rating == GameUtil.Rating.Good || this.rating == GameUtil.Rating.Perfect) {
+							this.dragPointer = e.pointer;
 							this.state = DRAG;
 						} else {
 							this.state = RATING;
@@ -177,20 +178,22 @@ public class DragCircle extends BeatCircle {
 			case DRAG: {
 				if (dragUserDuration > dragTotalTime) {
 					if (DEBUG) Log.i(TAG, "In State Drag: Expired Drag.");
-					if (e != null && e.type != TouchEvent.TOUCH_UP) { //User still dragging
-						rating = GameUtil.Rating.Miss;
-					} else { //User correctly let go
-						setDragRating();
-					}
+					rating = GameUtil.Rating.Miss;
 					this.state = RATING;
 				} 	else {
 					updateLocation();
-					if (e != null && isTouched(e.x, e.y)) {
-						if (DEBUG) Log.i(TAG, "In State Drag: Touched.");
-						this.resilience = 0;
+					if (e != null) {
+						if (e.pointer == this.dragPointer) {
+							if (e.type == TouchEvent.TOUCH_DRAGGED && isTouched(e.x, e.y)) {
+								if (DEBUG) Log.i(TAG, "In State Drag: Touched.");
+								this.resilience = 0;
+							} else { //User Lifted Pointer Up/Missed Circle
+								setDragRating();
+								this.state = RATING;
+							}
+						} //end if pointer							
 					} else {
-						if (DEBUG) Log.i(TAG, "In State Drag: Not Touched.");
-
+						if (DEBUG) Log.i(TAG, "In State Drag: Touch Event Null.");
 						if (this.resilience > DRAG_RESILIENCE) {
 							if (DEBUG) Log.i(TAG, "In State Drag: Resilence > Drag Resilience.");
 							setDragRating();

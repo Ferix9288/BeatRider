@@ -46,9 +46,7 @@ public class HoldCircle extends BeatCircle {
 				drawTimeArc(g);
 				if (lifeSpan >= OK_TIMING) {
 					drawLabel(g,"Hold!");									
-				} else {
-					drawLabel(g,"Wait!");
-				}
+				} 
 				break;
 				//else time runs out
 			}
@@ -75,6 +73,7 @@ public class HoldCircle extends BeatCircle {
 			}
 		} //end switch
 	}
+		
 	void drawHoldArc(Graphics g) {
 		float sweepAngle = 360 * (holdUserDuration/holdDuration);
 		if (sweepAngle >= 360) {

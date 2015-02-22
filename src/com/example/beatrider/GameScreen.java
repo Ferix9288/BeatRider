@@ -174,9 +174,9 @@ public class GameScreen extends Screen {
 //			tapCircle.setInitialization(640, 600, 100, 5);
 //			inGameBeatCircles.add(tapCircle);
 			
-//			HoldCircle holdCircle = holdCirclePool.newObject();
-//			holdCircle.setInitialization(300, 600, 100);
-//			inGameBeatCircles.add(holdCircle);
+			HoldCircle holdCircle = holdCirclePool.newObject();
+			holdCircle.setInitialization(300, 600, 100);
+			inGameBeatCircles.add(holdCircle);
 
     	}
     }
