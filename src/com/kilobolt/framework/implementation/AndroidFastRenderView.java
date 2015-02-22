@@ -43,15 +43,15 @@ public class AndroidFastRenderView extends SurfaceView implements Runnable {
             if(!holder.getSurface().isValid())
                 continue;           
               
-            float deltaTime = (System.nanoTime() - startTime) / 10000000.000f;
+            float deltaTime = (System.nanoTime() - startTime) / 1000000.000f;
             
             startTime = System.nanoTime();
             
             if (DEBUG) Log.i(TAG, "Delta Time - " + deltaTime
             		+ "|| startTime - " + startTime);
             
-            if (deltaTime > 3.15){
-            	deltaTime = (float) 3.15;
+            if (deltaTime > 30.15){
+            	deltaTime = (float) 30.15;
            }
                         
             game.getCurrentScreen().update(deltaTime);

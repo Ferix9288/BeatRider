@@ -30,6 +30,7 @@ public class GameScreen extends Screen {
     GameState state = GameState.Ready;
     
     GameReport report;
+    
 
     /** 
      * Beat Circle Factory.
@@ -56,7 +57,11 @@ public class GameScreen extends Screen {
     static Pool<HoldCircle> holdCirclePool;
 	static PoolObjectFactory<HoldCircle> holdCircleFactory;
 
-	
+
+    static ArrayList<Beat> BeatPattern = new ArrayList<Beat>();
+    static final int BPM = 100;
+    static final float BPS = BPM / 60;
+
 	static {
 		beatCircleFactory = new PoolObjectFactory<BeatCircle>() {
             @Override
@@ -90,6 +95,11 @@ public class GameScreen extends Screen {
             
         };    
         holdCirclePool = new Pool<HoldCircle>(holdCircleFactory, 50);
+        
+        
+        //Random Beat Pattern 
+//        BeatPattern.add(new Beat(new BeatCircle, BPS*10) );
+//        BeatPattern.add(new Beat(Beat.BeatType.Beat, BPS*10) );
 
 	}
 	
@@ -103,6 +113,8 @@ public class GameScreen extends Screen {
         super(game);
 
         // Initialize game objects here
+        
+        //Load Songs and Beats Here 
 
         // Defining a paint object
         paint = new Paint();
@@ -167,7 +179,7 @@ public class GameScreen extends Screen {
 //			inGameBeatCircles.add(newBeatCircle2);
     		
 			DragCircle dragCircle = dragCirclePool.newObject();
-			dragCircle.setInitialization(1000, 300, 100);
+			dragCircle.setInitialization(1000, 300, 1000);
 			inGameBeatCircles.add(dragCircle);
 
 //			TapCircle tapCircle = tapCirclePool.newObject();
@@ -175,7 +187,7 @@ public class GameScreen extends Screen {
 //			inGameBeatCircles.add(tapCircle);
 			
 			HoldCircle holdCircle = holdCirclePool.newObject();
-			holdCircle.setInitialization(300, 600, 100);
+			holdCircle.setInitialization(300, 600, 1000);
 			inGameBeatCircles.add(holdCircle);
 
     	}

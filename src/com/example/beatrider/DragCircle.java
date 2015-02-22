@@ -14,7 +14,7 @@ import com.kilobolt.framework.Input.TouchEvent;
 public class DragCircle extends BeatCircle {
 
 	static final int DRAG = 3;
-	static final int DRAG_DIVIDER = 5;
+	static final int DRAG_DIVIDER = 50;
 	static final int DRAG_INCREMENT = 20;
 	
 	static final int DRAG_RESILIENCE = 5;
@@ -176,7 +176,7 @@ public class DragCircle extends BeatCircle {
 			}
 			
 			case DRAG: {
-				if (dragUserDuration > dragTotalTime) {
+				if (dragUserDuration > dragTotalTime + LENIENCY) {
 					if (DEBUG) Log.i(TAG, "In State Drag: Expired Drag.");
 					rating = GameUtil.Rating.Miss;
 					this.state = RATING;

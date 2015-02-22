@@ -18,8 +18,8 @@ public class BeatCircle extends GameObject {
 	static final int DONE = 2;
 	
 	static final int FLOAT_TIME = 100;
-	static final float LENIENCY = 10;
-	static final float ON_DURATION = 200; //2 seconds
+	static final float LENIENCY = 100;
+	static final float ON_DURATION = 2000; //2 seconds
 	
 	static final float OK_TIMING = ON_DURATION*.6f;
 	static final float GOOD_TIMING = ON_DURATION*.8f;
