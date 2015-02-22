@@ -14,7 +14,7 @@ public class HoldCircle extends BeatCircle {
 	static final int HOLD = 3;
 	
 	static final String TAG = "Hold Circle";
-	static final boolean DEBUG = false;
+	static final boolean DEBUG = true;
 	
 	
 	//Additional Instance Variables
@@ -44,6 +44,7 @@ public class HoldCircle extends BeatCircle {
 				lifeSpan += deltaTime;
 				g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, Color.RED,  Style.STROKE);
 				drawTimeArc(g);
+				drawHoldLabel(g);
 				break;
 				//else time runs out
 			}
@@ -150,11 +151,11 @@ public class HoldCircle extends BeatCircle {
 		float HOLD_GOOD_TIMING = holdDuration*.8f;
 		float HOLD_PERFECT_TIMING = holdDuration*.95f;
 		
-		if (holdUserDuration >= HOLD_OK_TIMING) {
+		if (holdUserDuration >= HOLD_PERFECT_TIMING) {
 			rating = GameUtil.Rating.Perfect;
 		} else if (holdUserDuration >= HOLD_GOOD_TIMING) {
 			rating = GameUtil.Rating.Good;
-		} else if (holdUserDuration >= HOLD_PERFECT_TIMING) {
+		} else if (holdUserDuration >= HOLD_OK_TIMING) {
 			rating = GameUtil.Rating.Ok;
 		} else {
 			rating = GameUtil.Rating.Bad;
