@@ -50,6 +50,13 @@ public class GameScreen extends Screen {
     static Pool<TapCircle> tapCirclePool;
 	static PoolObjectFactory<TapCircle> tapCircleFactory;
 
+    /** 
+     * Hold Circle Factory.
+     */
+    static Pool<HoldCircle> holdCirclePool;
+	static PoolObjectFactory<HoldCircle> holdCircleFactory;
+
+	
 	static {
 		beatCircleFactory = new PoolObjectFactory<BeatCircle>() {
             @Override
@@ -58,7 +65,6 @@ public class GameScreen extends Screen {
             }
             
         };
-        
         beatCirclePool = new Pool<BeatCircle>(beatCircleFactory, 50);
         
         dragCircleFactory = new PoolObjectFactory<DragCircle>() {
@@ -67,7 +73,6 @@ public class GameScreen extends Screen {
             }            
             
         };
-        
         dragCirclePool = new Pool<DragCircle>(dragCircleFactory, 50);
         
         tapCircleFactory = new PoolObjectFactory<TapCircle>() {
@@ -75,9 +80,17 @@ public class GameScreen extends Screen {
                 return new TapCircle();
             }            
             
-        };
-        
+        };    
         tapCirclePool = new Pool<TapCircle>(tapCircleFactory, 50);
+
+        holdCircleFactory = new PoolObjectFactory<HoldCircle>() {
+            public HoldCircle createObject() {
+                return new HoldCircle();
+            }            
+            
+        };    
+        holdCirclePool = new Pool<HoldCircle>(holdCircleFactory, 50);
+
 	}
 	
     // Variable Setup
@@ -157,9 +170,13 @@ public class GameScreen extends Screen {
 //			dragCircle.setInitialization(1000, 300, 100);
 //			inGameBeatCircles.add(dragCircle);
 
-			TapCircle tapCircle = tapCirclePool.newObject();
-			tapCircle.setInitialization(640, 600, 100, 5);
-			inGameBeatCircles.add(tapCircle);
+//			TapCircle tapCircle = tapCirclePool.newObject();
+//			tapCircle.setInitialization(640, 600, 100, 5);
+//			inGameBeatCircles.add(tapCircle);
+			
+			HoldCircle holdCircle = holdCirclePool.newObject();
+			holdCircle.setInitialization(300, 600, 100);
+			inGameBeatCircles.add(holdCircle);
 
     	}
     }
