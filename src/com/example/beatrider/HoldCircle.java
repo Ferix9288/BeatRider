@@ -44,7 +44,11 @@ public class HoldCircle extends BeatCircle {
 				lifeSpan += deltaTime;
 				g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, Color.RED,  Style.STROKE);
 				drawTimeArc(g);
-				drawHoldLabel(g);
+				if (lifeSpan >= OK_TIMING) {
+					drawLabel(g,"Hold!");									
+				} else {
+					drawLabel(g,"Wait!");
+				}
 				break;
 				//else time runs out
 			}
@@ -53,7 +57,13 @@ public class HoldCircle extends BeatCircle {
 				holdUserDuration += deltaTime;
 				g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, Color.RED,  Style.STROKE);
 				drawHoldArc(g);
-				drawHoldLabel(g);
+				float HOLD_OK_TIMING = holdDuration*.6f;
+				if (holdUserDuration >= HOLD_OK_TIMING) {
+					drawLabel(g,"Release!");									
+				} else {
+					drawLabel(g,"Hold!");
+				}
+				
 				break;
 			}
 			
@@ -69,24 +79,27 @@ public class HoldCircle extends BeatCircle {
 	}
 	void drawHoldArc(Graphics g) {
 		float sweepAngle = 360 * (holdUserDuration/holdDuration);
-        this.paint.setColor(Color.YELLOW);        
+		if (sweepAngle >= 360) {
+			sweepAngle = 360;
+		}
+		
+        this.paint.setColor(0xFFFF6600); //Orange
         this.paint.setStyle(Style.STROKE);
         this.paint.setStrokeWidth(10);
         g.drawArc(xLeft-TIME_ARC_DIST, yUp-TIME_ARC_DIST, 
-        		xRight+TIME_ARC_DIST, yDown+TIME_ARC_DIST, -90, sweepAngle, true, paint);		
+        		xRight+TIME_ARC_DIST, yDown+TIME_ARC_DIST, -90, 360-sweepAngle, true, paint);		
 
 	}
 	
-	void drawHoldLabel(Graphics g) {
+	void drawLabel(Graphics g, String word) {
 		paint.setColor(Color.WHITE);
 		this.paint.setStrokeWidth(1);
 		paint.setTextSize(50);
 		paint.setTextAlign(Align.CENTER);
-		paint.setStyle(Style.STROKE);
-		g.drawString("Hold!", this.startingX, this.startingY-LABEL_LOCATION, paint);
+		paint.setStyle(Style.FILL_AND_STROKE);
+		g.drawString(word, this.startingX, this.startingY-LABEL_LOCATION, paint);		
 	}
 	
-
 	@Override
 	void update(TouchEvent e) {
 		
