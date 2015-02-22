@@ -14,19 +14,21 @@ public class TapCircle extends BeatCircle {
 	static final int TAP = 3;
 	
 	static final String TAG = "Tap Circle";
-	static final boolean DEBUG = true;
+	static final boolean DEBUG = false;
+	
 	
 	//Additional Instance Variables
 	float tapInterval;
 	float tapUserDuration;
 	int tapCount;
+	int tapIndex;
 	
 	public TapCircle() {
 		super();
 	}
 	
-	public TapCircle(int x, int y, float tapDuration, int tapCount) {
-		setInitialization(x, y, tapDuration, tapCount);		
+	public TapCircle(int x, int y, float tapInterval, int tapCount) {
+		setInitialization(x, y, tapInterval, tapCount);		
 	}
 	
 	void setInitialization(int x, int y, float tapInterval, int tapCount) {
@@ -44,7 +46,7 @@ public class TapCircle extends BeatCircle {
 			case ON: {
 				lifeSpan += deltaTime;
 				g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, Color.RED,  Style.STROKE);
-				drawTimeArc(g);
+				drawTapArc(g);
 				drawTapCount(g);
 				break;
 				//else time runs out
@@ -52,6 +54,7 @@ public class TapCircle extends BeatCircle {
 			
 			case TAP: {
 				tapUserDuration += deltaTime;
+				lifeSpan += deltaTime;
 				g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, Color.RED,  Style.STROKE);
 				drawTapArc(g);
 				drawTapCount(g);
@@ -75,20 +78,23 @@ public class TapCircle extends BeatCircle {
 		paint.setTextSize(50);
 		paint.setTextAlign(Align.CENTER);
 		paint.setStyle(Style.STROKE);
-		g.drawString(Integer.toString(tapCount), this.startingX, this.startingY, paint);
+		g.drawString(Integer.toString(tapCount-tapIndex), this.startingX, this.startingY-LABEL_LOCATION, paint);
 	}
 
 	void drawTapArc(Graphics g) {
-		
-		float sweepAngle = 360 * (tapUserDuration/tapInterval);
-		if (DEBUG) Log.i(TAG, "In drawTapArc: SweepAngle - " + sweepAngle);
+
 		this.paint.setColor(Color.YELLOW);        
         this.paint.setStyle(Style.STROKE);
         this.paint.setStrokeWidth(10);
-        g.drawArc(xLeft-TIME_ARC_DIST, yUp-TIME_ARC_DIST, 
-        		xRight+TIME_ARC_DIST, yDown+TIME_ARC_DIST, -90, sweepAngle, true, paint);		
+
+		for (int i = tapIndex; i < tapCount; i++) {
+			float sweepAngle = 360 * (lifeSpan/ (ON_DURATION + tapInterval*i) );
+	        g.drawArc(xLeft-TIME_ARC_DIST, yUp-TIME_ARC_DIST, 
+	        		xRight+TIME_ARC_DIST, yDown+TIME_ARC_DIST, -90, sweepAngle, true, paint);		
+		}
 	}
-		
+
+	
 	@Override
 	void update(TouchEvent e) {
 		
@@ -106,7 +112,7 @@ public class TapCircle extends BeatCircle {
 						//if (DEBUG) Log.i(TAG, "Touched: " + this.lifeSpan);
 						setRating();
 						if (this.rating == GameUtil.Rating.Good || this.rating == GameUtil.Rating.Perfect) {
-							tapCount--;
+							tapIndex++;
 							this.state = TAP;
 						} else {
 							this.state = RATING;
@@ -127,7 +133,7 @@ public class TapCircle extends BeatCircle {
 					this.state = RATING;
 				} else {
 					if (e != null && e.type == TouchEvent.TOUCH_DOWN && isTouched(e.x, e.y)) {
-						if (tapCount == 1) {
+						if (tapIndex == tapCount-1) {
 							setTapRating();
 							this.state = RATING;
 						} else {
@@ -135,7 +141,7 @@ public class TapCircle extends BeatCircle {
 							if (this.rating == GameUtil.Rating.Bad) {
 								this.state = RATING;
 							}
-							tapCount--;
+							tapIndex++;
 							tapUserDuration = 0;
 						}
 					}

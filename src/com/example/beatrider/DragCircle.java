@@ -168,7 +168,7 @@ public class DragCircle extends BeatCircle {
 			case DRAG: {
 				if (dragUserDuration > dragTotalTime) {
 					if (DEBUG) Log.i(TAG, "In State Drag: Expired Drag.");
-					if (e != null) { //User still dragging
+					if (e != null && e.type != TouchEvent.TOUCH_UP) { //User still dragging
 						rating = GameUtil.Rating.Miss;
 					} else { //User correctly let go
 						setDragRating();

@@ -26,6 +26,7 @@ public class BeatCircle extends GameObject {
 	
 	static final int CIRCLE_RADIUS = 100;
 	static final int TIME_ARC_DIST = 20;
+	static final int LABEL_LOCATION = CIRCLE_RADIUS+TIME_ARC_DIST*2;
 	
 	protected static final boolean DEBUG = true;
 	protected static final String TAG = "Beat Circle";
