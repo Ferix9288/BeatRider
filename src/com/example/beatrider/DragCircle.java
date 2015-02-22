@@ -19,7 +19,7 @@ public class DragCircle extends BeatCircle {
 	
 	static final int DRAG_RESILIENCE = 5;
 	
-	static final boolean DEBUG = false;
+	static final boolean DEBUG = true;
 	
 	//Additional Instance Variables
 	float dragUserDuration;
@@ -83,6 +83,9 @@ public class DragCircle extends BeatCircle {
 				g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, Color.RED,  Style.STROKE);
 				drawTimeArc(g);
 				drawDragTemplatePath(g);
+				if (lifeSpan >= OK_TIMING) {
+					drawLabel(g, "Drag!");
+				}
 				break;
 				//else time runs out
 			}
@@ -92,11 +95,16 @@ public class DragCircle extends BeatCircle {
 				drawDragCircle(g);
 				drawDragTemplatePath(g);
 				drawUserDragPath(g);
+				float DRAG_OK_TIMING = dragTotalTime*.6f;
+				if (dragUserDuration >= DRAG_OK_TIMING) {
+					drawLabel(g, "Release!");
+				}
 				break;
 			}
 			
 			case RATING: {
-				drawRating(g);							
+				drawRating(g);
+				this.wordLifeSpan++;
 				break;
 			}
 			
@@ -109,6 +117,7 @@ public class DragCircle extends BeatCircle {
 	void drawDragCircle(Graphics g) {
 		paint.setColor(Color.RED);
 		paint.setStrokeWidth(5);
+		paint.setStyle(Style.FILL_AND_STROKE);
 		 g.drawArc(this.xLocation - CIRCLE_RADIUS, this.yLocation - CIRCLE_RADIUS, 
 				 this.xLocation + CIRCLE_RADIUS, this.yLocation + CIRCLE_RADIUS, -90, 360, true, paint);		
 
@@ -180,8 +189,10 @@ public class DragCircle extends BeatCircle {
 						if (DEBUG) Log.i(TAG, "In State Drag: Touched.");
 						this.resilience = 0;
 					} else {
-						if (DEBUG) Log.i(TAG, "In State Drag: Null Event.");
+						if (DEBUG) Log.i(TAG, "In State Drag: Not Touched.");
+
 						if (this.resilience > DRAG_RESILIENCE) {
+							if (DEBUG) Log.i(TAG, "In State Drag: Resilence > Drag Resilience.");
 							setDragRating();
 							this.state = RATING;
 						} 
@@ -196,8 +207,6 @@ public class DragCircle extends BeatCircle {
 				//if (DEBUG) Log.i(TAG, "State Rating: " + this.wordLifeSpan);
  				if (this.wordLifeSpan > FLOAT_TIME) {
 					this.state = DONE;
-				} else {
-					this.wordLifeSpan++;
 				}
 				break;
 			}

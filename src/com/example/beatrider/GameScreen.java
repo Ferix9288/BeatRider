@@ -166,17 +166,17 @@ public class GameScreen extends Screen {
 //			newBeatCircle2.setInitialization(640, 600);
 //			inGameBeatCircles.add(newBeatCircle2);
     		
-//			DragCircle dragCircle = dragCirclePool.newObject();
-//			dragCircle.setInitialization(1000, 300, 100);
-//			inGameBeatCircles.add(dragCircle);
+			DragCircle dragCircle = dragCirclePool.newObject();
+			dragCircle.setInitialization(1000, 300, 100);
+			inGameBeatCircles.add(dragCircle);
 
 //			TapCircle tapCircle = tapCirclePool.newObject();
 //			tapCircle.setInitialization(640, 600, 100, 5);
 //			inGameBeatCircles.add(tapCircle);
 			
-			HoldCircle holdCircle = holdCirclePool.newObject();
-			holdCircle.setInitialization(300, 600, 100);
-			inGameBeatCircles.add(holdCircle);
+//			HoldCircle holdCircle = holdCirclePool.newObject();
+//			holdCircle.setInitialization(300, 600, 100);
+//			inGameBeatCircles.add(holdCircle);
 
     	}
     }

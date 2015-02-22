@@ -3,6 +3,7 @@ package com.example.beatrider;
 
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Paint.Align;
 import android.graphics.Paint.Style;
 import android.util.Log;
 
@@ -89,7 +90,8 @@ public class BeatCircle extends GameObject {
 			}
 			
 			case RATING: {
-				drawRating(g);							
+				drawRating(g);
+				this.wordLifeSpan++;
 				break;
 			}
 			
@@ -106,6 +108,15 @@ public class BeatCircle extends GameObject {
         this.paint.setStrokeWidth(10);
         g.drawArc(xLeft-TIME_ARC_DIST, yUp-TIME_ARC_DIST, 
         		xRight+TIME_ARC_DIST, yDown+TIME_ARC_DIST, -90, sweepAngle, true, paint);		
+	}
+	
+	void drawLabel(Graphics g, String word) {
+		paint.setColor(Color.WHITE);
+		this.paint.setStrokeWidth(1);
+		paint.setTextSize(50);
+		paint.setTextAlign(Align.CENTER);
+		paint.setStyle(Style.FILL_AND_STROKE);
+		g.drawString(word, this.xLocation, this.yLocation-LABEL_LOCATION, paint);		
 	}
 	
 	void drawRating(Graphics g) {
@@ -165,9 +176,7 @@ public class BeatCircle extends GameObject {
 				//if (DEBUG) Log.i(TAG, "State Rating: " + this.wordLifeSpan);
  				if (this.wordLifeSpan > FLOAT_TIME) {
 					this.state = DONE;
-				} else {
-					this.wordLifeSpan++;
-				}
+				} 
 				break;
 			}
 			

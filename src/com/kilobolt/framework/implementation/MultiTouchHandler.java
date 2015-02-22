@@ -59,43 +59,64 @@ public class MultiTouchHandler implements TouchHandler {
 		
 		int x = (int) event.getX(actionIndex);
 		int y = (int) event.getY(actionIndex);
-		TouchEvent touchEvent = touchEventPool.newObject();
-		touchEvent.pointer = pointerId;
-		id[pointerId] = pointerId;
 
 		
 		if (pointerCount > 1) { //Multiple Touch Event  
-	
-			switch (maskedAction) {
-				case MotionEvent.ACTION_POINTER_DOWN: 
-					actionString = "POINTER DOWN";
-					touchEvent.type = TouchEvent.TOUCH_DOWN;;
-					isTouched[pointerId] = true;
-					break;
-				
-				case MotionEvent.ACTION_POINTER_UP:
-					actionString = "POINTER UP";
-					touchEvent.type = TouchEvent.TOUCH_UP;
-					isTouched[pointerId] = false;
-					break;
-					
-				case MotionEvent.ACTION_MOVE:
-					actionString = "MOVE";
-					touchEvent.type = TouchEvent.TOUCH_DRAGGED;
-					isTouched[pointerId] = true;
-					break;
-				
-				default:
-					actionString = "Default";
-					touchEvent.type = TouchEvent.TOUCH_UNKNOWN;
-					isTouched[pointerId] = false;
-					break;
-			}
 			
-			String touchStatus = "Multi Touch Action: " + actionString + " actionIndex: " + actionIndex + " pointerID: " + pointerId + " X: " + x + " Y: " + y;
-    		if (DEBUG) Log.i(TAG, touchStatus);
-    		
+			if (maskedAction == MotionEvent.ACTION_MOVE) {
+				actionString = "MOVE";
+				isTouched[pointerId] = true;
+				for (int i = 0; i < pointerCount; i++) {
+					TouchEvent touchEvent = touchEventPool.newObject();
+					touchEvent.pointer = i;
+					touchEvent.type = TouchEvent.TOUCH_DRAGGED;
+					id[i] = i;
+			  		touchEvent.x = (int) (event.getX(i)*scaleX);
+		    		touchEvent.y = (int) (event.getY(i)*scaleY);
+		    		touchEventsBuffer.add(touchEvent);
+					String touchStatus = "Multi Touch Action: " + actionString + " actionIndex: " + actionIndex + " pointerID: " + touchEvent.pointer  
+							+ " X: " + touchEvent.x + " Y: " + touchEvent.y;
+		    		if (DEBUG) Log.i(TAG, touchStatus);
+				}
+				
+			} else {
+				TouchEvent touchEvent = touchEventPool.newObject();
+				touchEvent.pointer = pointerId;
+				id[pointerId] = pointerId;
+	
+				switch (maskedAction) {
+					case MotionEvent.ACTION_POINTER_DOWN: 
+						actionString = "POINTER DOWN";
+						touchEvent.type = TouchEvent.TOUCH_DOWN;;
+						isTouched[pointerId] = true;
+						break;
+					
+					case MotionEvent.ACTION_POINTER_UP:
+						actionString = "POINTER UP";
+						touchEvent.type = TouchEvent.TOUCH_UP;
+						isTouched[pointerId] = false;
+						break;
+											
+					default:
+						actionString = "Default";
+						touchEvent.type = TouchEvent.TOUCH_UNKNOWN;
+						isTouched[pointerId] = false;
+						break;
+				    		
+				} // end switch
+	    		touchEvent.x = (int) (x*scaleX);
+	    		touchEvent.y = (int) (y*scaleY);
+	    		touchEventsBuffer.add(touchEvent);
+				String touchStatus = "Multi Touch Action: " + actionString + " actionIndex: " + actionIndex + " pointerID: " + pointerId + " X: " + x + " Y: " + y;
+	    		if (DEBUG) Log.i(TAG, touchStatus);
+			} //end else 
+			
+
+
 		}  else {
+			TouchEvent touchEvent = touchEventPool.newObject();
+			touchEvent.pointer = pointerId;
+			id[pointerId] = pointerId;
 			
 			switch (maskedAction) {
 				case MotionEvent.ACTION_DOWN: 
@@ -126,11 +147,12 @@ public class MultiTouchHandler implements TouchHandler {
 
 			String touchStatus = "Single Touch Action: " + actionString + " actionIndex: " + actionIndex + " pointerID: " + pointerId + " X: " + x + " Y: " + y;
     		if (DEBUG) Log.i(TAG, touchStatus);	
+    		touchEvent.x = (int) (x*scaleX);
+    		touchEvent.y = (int) (y*scaleY);
+    		touchEventsBuffer.add(touchEvent);
 		}
 
-		touchEvent.x = (int) (x*scaleX);
-		touchEvent.y = (int) (y*scaleY);
-		touchEventsBuffer.add(touchEvent);
+
 
 		return true;
 

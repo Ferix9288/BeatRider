@@ -62,7 +62,8 @@ public class TapCircle extends BeatCircle {
 			}
 			
 			case RATING: {
-				drawRating(g);							
+				drawRating(g);
+				this.wordLifeSpan++;
 				break;
 			}
 			
@@ -155,9 +156,7 @@ public class TapCircle extends BeatCircle {
 				//if (DEBUG) Log.i(TAG, "State Rating: " + this.wordLifeSpan);
  				if (this.wordLifeSpan > FLOAT_TIME) {
 					this.state = DONE;
-				} else {
-					this.wordLifeSpan++;
-				}
+				} 
 				break;
 			}
 			

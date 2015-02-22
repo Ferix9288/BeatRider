@@ -60,15 +60,13 @@ public class HoldCircle extends BeatCircle {
 				float HOLD_OK_TIMING = holdDuration*.6f;
 				if (holdUserDuration >= HOLD_OK_TIMING) {
 					drawLabel(g,"Release!");									
-				} else {
-					drawLabel(g,"Hold!");
 				}
-				
 				break;
 			}
 			
 			case RATING: {
-				drawRating(g);							
+				drawRating(g);
+				this.wordLifeSpan++;
 				break;
 			}
 			
@@ -91,14 +89,6 @@ public class HoldCircle extends BeatCircle {
 
 	}
 	
-	void drawLabel(Graphics g, String word) {
-		paint.setColor(Color.WHITE);
-		this.paint.setStrokeWidth(1);
-		paint.setTextSize(50);
-		paint.setTextAlign(Align.CENTER);
-		paint.setStyle(Style.FILL_AND_STROKE);
-		g.drawString(word, this.startingX, this.startingY-LABEL_LOCATION, paint);		
-	}
 	
 	@Override
 	void update(TouchEvent e) {
@@ -146,8 +136,6 @@ public class HoldCircle extends BeatCircle {
 				//if (DEBUG) Log.i(TAG, "State Rating: " + this.wordLifeSpan);
  				if (this.wordLifeSpan > FLOAT_TIME) {
 					this.state = DONE;
-				} else {
-					this.wordLifeSpan++;
 				}
 				break;
 			}
