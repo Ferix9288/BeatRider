@@ -10,6 +10,7 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.util.Log;
 
+import com.example.beatrider.Beat.BeatType;
 import com.kilobolt.framework.Game;
 import com.kilobolt.framework.Graphics;
 import com.kilobolt.framework.Image;
@@ -24,6 +25,7 @@ public class GameScreen extends Screen {
     }
 
 	private static final boolean DEBUG = false;
+	private static final int MAX_AT_PLAY = 20;
 
 	private static final String TAG = "Game Screen";
 
@@ -31,11 +33,14 @@ public class GameScreen extends Screen {
     
     GameReport report;
     
+    float GameTimer;
+    
 
     /** 
      * Beat Circle Factory.
      */
     static Pool<BeatCircle> beatCirclePool;
+	List<BeatCircle> inQueueBeatCircles = new ArrayList<BeatCircle>();
 	List<BeatCircle> inGameBeatCircles = new ArrayList<BeatCircle>();
 	static PoolObjectFactory<BeatCircle> beatCircleFactory;
 
@@ -61,6 +66,7 @@ public class GameScreen extends Screen {
     static ArrayList<Beat> BeatPattern = new ArrayList<Beat>();
     static final int BPM = 100;
     static final float BPS = BPM / 60;
+    int beatIndex;
 
 	static {
 		beatCircleFactory = new PoolObjectFactory<BeatCircle>() {
@@ -98,8 +104,11 @@ public class GameScreen extends Screen {
         
         
         //Random Beat Pattern 
-//        BeatPattern.add(new Beat(new BeatCircle, BPS*10) );
-//        BeatPattern.add(new Beat(Beat.BeatType.Beat, BPS*10) );
+        BeatPattern.add(new Beat(BeatType.SingleTap, new String[]{"500", "500"}, 5000));
+        BeatPattern.add(new Beat(BeatType.SingleTap, new String[]{"500", "500"}, 10000));
+        BeatPattern.add(new Beat(BeatType.SingleTap, new String[]{"700", "500"}, 10000));
+
+        //        BeatPattern.add(new Beat(Beat.BeatType.Beat, BPS*10) );
 
 	}
 	
@@ -124,6 +133,9 @@ public class GameScreen extends Screen {
         paint.setColor(Color.WHITE);
         
         report = new GameReport();
+        
+        GameTimer = 0;
+        beatIndex = 0;
     }
 
     @Override
@@ -141,6 +153,7 @@ public class GameScreen extends Screen {
         }
        
         if (state == GameState.Running) {
+            GameTimer += deltaTime;
         	generateBeats();
             updateRunning(touchEvents, deltaTime);
         }
@@ -169,6 +182,62 @@ public class GameScreen extends Screen {
     	int currentBeats = inGameBeatCircles.size();
     	//if (DEBUG) Log.i(TAG, "generateBeats:" + currentBeats);
 
+    	while (inQueueBeatCircles.size() < MAX_AT_PLAY && beatIndex < BeatPattern.size()) {
+    		Beat currentBeat = BeatPattern.get(beatIndex);
+    		float startTime = currentBeat.startTime;
+    		switch(currentBeat.type) {
+				case SingleTap:
+					BeatCircle newBeatCircle = beatCirclePool.newObject();
+					newBeatCircle.setInitialization(Integer.parseInt(currentBeat.parameters[0]),
+							Integer.parseInt(currentBeat.parameters[1]));
+					newBeatCircle.startTime = startTime;
+					inQueueBeatCircles.add(newBeatCircle);
+					break;
+
+				case MultipleTap:
+					TapCircle newTapCircle = tapCirclePool.newObject();
+					newTapCircle.setInitialization(Integer.parseInt(currentBeat.parameters[0]),
+							Integer.parseInt(currentBeat.parameters[1]), 
+							Float.parseFloat(currentBeat.parameters[2]), 
+							Integer.parseInt(currentBeat.parameters[3]));
+					newTapCircle.startTime = startTime;
+					inQueueBeatCircles.add(newTapCircle);
+					break;
+
+				case Hold:
+					HoldCircle newHoldCircle = holdCirclePool.newObject();
+					newHoldCircle.setInitialization(Integer.parseInt(currentBeat.parameters[0]),
+							Integer.parseInt(currentBeat.parameters[1]), 
+							Float.parseFloat(currentBeat.parameters[2]));					newHoldCircle.startTime = startTime;
+					inQueueBeatCircles.add(newHoldCircle);
+
+					break;
+
+				case Drag:
+					DragCircle newDragCircle = dragCirclePool.newObject();
+					newDragCircle.setInitialization(Integer.parseInt(currentBeat.parameters[0]),
+							Integer.parseInt(currentBeat.parameters[1]), 
+							Float.parseFloat(currentBeat.parameters[2]));					newDragCircle.startTime = startTime;
+					inQueueBeatCircles.add(newDragCircle);
+
+					break;
+
+				default:
+					break;
+    		}
+    		beatIndex++;
+    	}
+    	
+    	for (int i = 0; i < inQueueBeatCircles.size(); i++) {
+    		BeatCircle currentBeatCircle = inQueueBeatCircles.get(i);
+    		if (GameTimer > currentBeatCircle.startTime) {
+    			currentBeatCircle.start();
+    			inQueueBeatCircles.remove(i);
+    			inGameBeatCircles.add(currentBeatCircle);
+    		}
+    	}
+    	
+    	
     	if (currentBeats < 1) {
 //			BeatCircle newBeatCircle = beatCirclePool.newObject();
 //			newBeatCircle.setInitialization(640, 300);
@@ -178,17 +247,17 @@ public class GameScreen extends Screen {
 //			newBeatCircle2.setInitialization(640, 600);
 //			inGameBeatCircles.add(newBeatCircle2);
     		
-			DragCircle dragCircle = dragCirclePool.newObject();
-			dragCircle.setInitialization(1000, 300, 1000);
-			inGameBeatCircles.add(dragCircle);
+//			DragCircle dragCircle = dragCirclePool.newObject();
+//			dragCircle.setInitialization(1000, 300, 1000);
+//			inGameBeatCircles.add(dragCircle);
 
 //			TapCircle tapCircle = tapCirclePool.newObject();
 //			tapCircle.setInitialization(640, 600, 100, 5);
 //			inGameBeatCircles.add(tapCircle);
 			
-			HoldCircle holdCircle = holdCirclePool.newObject();
-			holdCircle.setInitialization(300, 600, 1000);
-			inGameBeatCircles.add(holdCircle);
+//			HoldCircle holdCircle = holdCirclePool.newObject();
+//			holdCircle.setInitialization(300, 600, 1000);
+//			inGameBeatCircles.add(holdCircle);
 
     	}
     }

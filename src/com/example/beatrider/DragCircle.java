@@ -13,7 +13,7 @@ import com.kilobolt.framework.Input.TouchEvent;
 
 public class DragCircle extends BeatCircle {
 
-	static final int DRAG = 3;
+	static final int DRAG = 4;
 	static final int DRAG_DIVIDER = 50;
 	static final int DRAG_INCREMENT = 20;
 	

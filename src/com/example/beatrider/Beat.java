@@ -1,13 +1,22 @@
 package com.example.beatrider;
 
 public class Beat {
-
-	BeatCircle type; 
-	float timeStart; 
-	
-	public Beat(BeatCircle t, float timeStart) {
-		this.type = t;
-		this.timeStart = timeStart;
+    
+	enum BeatType {
+		SingleTap,
+		Drag,
+		Hold,
+		MultipleTap
 	}
+	BeatType type; 
+	String[] parameters;
+	float startTime;
 	
+	
+	public Beat(BeatType t, String[] parameters, float startTime) {
+		this.type = t;
+		this.parameters = parameters;
+		this.startTime = startTime;
+	}
+		
 }

@@ -14,7 +14,7 @@ import com.kilobolt.framework.Pool.PoolObjectFactory;
 public class MultiTouchHandler implements TouchHandler {
 	private static final int MAX_TOUCHPOINTS = 10;
 
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 
 	private static final String TAG = "Multi Touch";
 	

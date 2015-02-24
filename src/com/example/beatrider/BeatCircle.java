@@ -13,9 +13,10 @@ import com.kilobolt.framework.Input.TouchEvent;
 
 public class BeatCircle extends GameObject {
 	
-	static final int ON = 0;
-	static final int RATING = 1;
-	static final int DONE = 2;
+	static final int WAIT = 0;
+	static final int ON = 1;
+	static final int RATING = 2;
+	static final int DONE = 3;
 	
 	static final int FLOAT_TIME = 100;
 	static final float LENIENCY = 100;
@@ -37,16 +38,15 @@ public class BeatCircle extends GameObject {
 	int xLeft, xRight, yDown, yUp; //Hitbox
 	int startingX, startingY;
 	int state;
+	float startTime;
 	Rating rating;
 	int wordLifeSpan;
 	float lifeSpan; 
-	boolean visible;
 	Paint paint;
 	int alpha;
 	
 	
 	public BeatCircle() {
-		this.visible = true;
 		
         // Defining a paint object
         this.paint = new Paint();
@@ -71,16 +71,20 @@ public class BeatCircle extends GameObject {
 		this.yDown = y + CIRCLE_RADIUS;
 		this.yUp = y - CIRCLE_RADIUS;
 		
-		this.state = ON;
+		this.state = WAIT;
 		this.lifeSpan = 0;
 		this.wordLifeSpan = 0;
 		this.alpha = 0xFF;
 	}
-		
+			
 	@Override
 	void draw(Graphics g, float deltaTime) {
 		
 		switch(this.state) {
+		
+			case WAIT: {
+				break;
+			}
 			case ON: {
 				lifeSpan += deltaTime;
 				g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, Color.RED,  Style.STROKE);
@@ -156,6 +160,11 @@ public class BeatCircle extends GameObject {
 	
 	void update(TouchEvent e) {
 		switch(this.state) {
+		
+			case WAIT: {
+				break;
+			}
+			
 			case ON: {
 				
 				if (lifeSpan > ON_DURATION + LENIENCY){
@@ -213,6 +222,10 @@ public class BeatCircle extends GameObject {
 		}
 
 		return false;
+	}
+
+	void start() {
+		this.state = ON;
 	}
 	
 	boolean isDone(){

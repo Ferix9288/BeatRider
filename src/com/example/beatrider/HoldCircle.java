@@ -11,7 +11,7 @@ import com.kilobolt.framework.Input.TouchEvent;
 
 public class HoldCircle extends BeatCircle {
 
-	static final int HOLD = 3;
+	static final int HOLD = 4;
 	
 	static final String TAG = "Hold Circle";
 	static final boolean DEBUG = true;

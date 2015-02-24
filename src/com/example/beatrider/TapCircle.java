@@ -11,7 +11,7 @@ import com.kilobolt.framework.Input.TouchEvent;
 
 public class TapCircle extends BeatCircle {
 
-	static final int TAP = 3;
+	static final int TAP = 4;
 	
 	static final String TAG = "Tap Circle";
 	static final boolean DEBUG = false;
