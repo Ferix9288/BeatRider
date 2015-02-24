@@ -6,6 +6,7 @@ import android.graphics.Paint.Align;
 import android.graphics.Paint.Style;
 import android.util.Log;
 
+import com.example.beatrider.Beat.BeatType;
 import com.kilobolt.framework.Graphics;
 import com.kilobolt.framework.Input.TouchEvent;
 
@@ -29,6 +30,7 @@ public class TapCircle extends BeatCircle {
 	
 	public TapCircle(int x, int y, float tapInterval, int tapCount) {
 		setInitialization(x, y, tapInterval, tapCount);		
+		this.type = BeatType.MultipleTap;
 	}
 	
 	void setInitialization(int x, int y, float tapInterval, int tapCount) {

@@ -25,6 +25,7 @@ public class GameScreen extends Screen {
     }
 
 	private static final boolean DEBUG = false;
+	private static final boolean SHOW_FPS = false;
 	private static final int MAX_AT_PLAY = 20;
 
 	private static final String TAG = "Game Screen";
@@ -35,6 +36,9 @@ public class GameScreen extends Screen {
     
     float GameTimer;
     
+    private static final int MOCK_TOP = 50;
+    int CountDown;
+    int currentFPS;
 
     /** 
      * Beat Circle Factory.
@@ -135,6 +139,7 @@ public class GameScreen extends Screen {
         report = new GameReport();
         
         GameTimer = 0;
+        CountDown = MOCK_TOP;
         beatIndex = 0;
     }
 
@@ -153,7 +158,6 @@ public class GameScreen extends Screen {
         }
        
         if (state == GameState.Running) {
-            GameTimer += deltaTime;
         	generateBeats();
             updateRunning(touchEvents, deltaTime);
         }
@@ -237,29 +241,6 @@ public class GameScreen extends Screen {
     		}
     	}
     	
-    	
-    	if (currentBeats < 1) {
-//			BeatCircle newBeatCircle = beatCirclePool.newObject();
-//			newBeatCircle.setInitialization(640, 300);
-//			inGameBeatCircles.add(newBeatCircle);
-			
-//			BeatCircle newBeatCircle2 = beatCirclePool.newObject();
-//			newBeatCircle2.setInitialization(640, 600);
-//			inGameBeatCircles.add(newBeatCircle2);
-    		
-//			DragCircle dragCircle = dragCirclePool.newObject();
-//			dragCircle.setInitialization(1000, 300, 1000);
-//			inGameBeatCircles.add(dragCircle);
-
-//			TapCircle tapCircle = tapCirclePool.newObject();
-//			tapCircle.setInitialization(640, 600, 100, 5);
-//			inGameBeatCircles.add(tapCircle);
-			
-//			HoldCircle holdCircle = holdCirclePool.newObject();
-//			holdCircle.setInitialization(300, 600, 1000);
-//			inGameBeatCircles.add(holdCircle);
-
-    	}
     }
     private void updateRunning(List<TouchEvent> touchEvents, float deltaTime) {
         
@@ -277,6 +258,7 @@ public class GameScreen extends Screen {
             	beatCircle.update(null);
             	if (beatCircle.isDone()) {
             		inGameBeatCircles.remove(j);
+            		freeBeatCircle(beatCircle);
             		report.missCounter ++;
             	}
             }  	
@@ -292,6 +274,7 @@ public class GameScreen extends Screen {
 	            	beatCircle.update(event);
 	            	if (beatCircle.isDone()) {
 	            		inGameBeatCircles.remove(j);
+	            		freeBeatCircle(beatCircle);
 	            		switch(beatCircle.rating) {
 							case Bad:
 								report.badCounter++;
@@ -310,33 +293,7 @@ public class GameScreen extends Screen {
 	            		}
 	            	}
 	            }
-	            
-	            
-	           
-	            if (event.type == TouchEvent.TOUCH_DOWN) {
-	
-	                if (event.x < 640) {
-	                    // Move left.
-	                }
-	
-	                else if (event.x > 640) {
-	                    // Move right.
-	                }
-	
-	            }
-	
-	            if (event.type == TouchEvent.TOUCH_UP) {
-	
-	                if (event.x < 640) {
-	                    // Stop moving left.
-	                }
-	
-	                else if (event.x > 640) {
-	                    // Stop moving right. }
-	                }
-	            }
-
-            
+	                        
 	        }
         }
         
@@ -350,7 +307,39 @@ public class GameScreen extends Screen {
         // 3. Call individual update() methods here.
         // This is where all the game updates happen.
         // For example, robot.update();
- 
+        
+        //Update Timer
+        GameTimer += deltaTime;
+        int deductSeconds = (int) (GameTimer / 1000);
+        CountDown = MOCK_TOP - deductSeconds;
+        
+        //Update FPS
+        if (SHOW_FPS) {
+        	currentFPS = (int) (1000 / deltaTime); 
+        }
+    }
+    
+    private void freeBeatCircle(BeatCircle beatCircle) {
+    	switch(beatCircle.type) {
+			case SingleTap:
+				beatCirclePool.free(beatCircle);
+				break;
+	
+			case MultipleTap:
+				tapCirclePool.free( (TapCircle) beatCircle);
+				break;
+	
+			case Hold:
+				holdCirclePool.free( (HoldCircle) beatCircle);
+				break;
+	
+			case Drag:
+				dragCirclePool.free( (DragCircle) beatCircle);
+				break;
+	
+			default:
+				break;
+    	} //end switch
     }
 
     private void updatePaused(List<TouchEvent> touchEvents) {
@@ -386,6 +375,7 @@ public class GameScreen extends Screen {
     public void paint(float deltaTime) {
         Graphics g = game.getGraphics();
         g.clearScreen(Color.BLACK);
+        
         // First draw the game elements.
 
         // Example:
@@ -431,8 +421,26 @@ public class GameScreen extends Screen {
 
     private void drawRunningUI() {
         Graphics g = game.getGraphics();
-        g.drawString("Pause Button here.",
-                game.getGraphics().getWidth() - 50, game.getGraphics().getHeight() - 10, paint);        
+        //g.drawString("Pause Button here.",
+        //        game.getGraphics().getWidth() - 50, game.getGraphics().getHeight() - 10, paint);        
+
+        //Pause Button
+        g.drawRect(game.getGraphics().getWidth()-50, game.getGraphics().getHeight() - 10, 
+        		15, 100, Color.WHITE, Style.FILL_AND_STROKE);
+        
+        g.drawRect(game.getGraphics().getWidth()-25, game.getGraphics().getHeight() - 10, 
+        		15, 100, Color.WHITE, Style.FILL_AND_STROKE);
+
+        //Health Bar
+        g.drawRect(game.getGraphics().getWidth()/4, game.getGraphics().getHeight() - 10, 
+        		game.getGraphics().getWidth()/2, 30, Color.GREEN, Style.FILL_AND_STROKE);
+
+        //Timer 
+        g.drawString(Integer.toString(CountDown), game.getGraphics().getWidth()/2, game.getGraphics().getHeight() - 30, paint);
+
+        //FPS
+        if (SHOW_FPS) g.drawString(Integer.toString(currentFPS), game.getGraphics().getWidth()-100, game.getGraphics().getHeight() - 30, paint);
+
     }
     
     private void drawRunning(float deltaTime) {

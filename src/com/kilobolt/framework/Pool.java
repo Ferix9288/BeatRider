@@ -3,10 +3,16 @@ package com.kilobolt.framework;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.util.Log;
+
 public class Pool<T> {
     public interface PoolObjectFactory<T> {
         public T createObject();
     }
+
+	private static final boolean DEBUG = true;
+
+	private static final String TAG = "Pool";
 
     private final List<T> freeObjects;
     private final PoolObjectFactory<T> factory;
@@ -21,11 +27,14 @@ public class Pool<T> {
     public T newObject() {
         T object = null;
 
-        if (freeObjects.size() == 0)
+        if (freeObjects.size() == 0) {
             object = factory.createObject();
-        else
+        	if (DEBUG) Log.i (TAG, "Created New Object. Id ::" + object.toString());
+        } else {
             object = freeObjects.remove(freeObjects.size() - 1);
+        	if (DEBUG) Log.i (TAG, "Reuse Object. Id ::" + object.toString());
 
+        }
         return object;
     }
 

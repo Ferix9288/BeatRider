@@ -9,7 +9,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 public class AndroidFastRenderView extends SurfaceView implements Runnable {
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 	private static final String TAG = "Android Fast Render";
 
 	AndroidGame game;
@@ -47,11 +47,12 @@ public class AndroidFastRenderView extends SurfaceView implements Runnable {
             
             startTime = System.nanoTime();
             
-            if (DEBUG) Log.i(TAG, "Delta Time - " + deltaTime
-            		+ "|| startTime - " + startTime);
+//            if (DEBUG) Log.i(TAG, "Delta Time - " + deltaTime
+//            		+ "|| startTime - " + startTime);
             
-            if (deltaTime > 30.15){
-            	deltaTime = (float) 30.15;
+            if (deltaTime > 33){
+                Log.w(TAG, "Warning - Time Exceeded Acceptable Frame Rate :: " + deltaTime);
+            	//deltaTime = (float) 30.15;
            }
                         
             game.getCurrentScreen().update(deltaTime);

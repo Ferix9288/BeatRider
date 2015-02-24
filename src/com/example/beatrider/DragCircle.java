@@ -8,6 +8,7 @@ import android.graphics.Paint.Style;
 import android.graphics.Point;
 import android.util.Log;
 
+import com.example.beatrider.Beat.BeatType;
 import com.kilobolt.framework.Graphics;
 import com.kilobolt.framework.Input.TouchEvent;
 
@@ -34,6 +35,7 @@ public class DragCircle extends BeatCircle {
 	
 	public DragCircle() {
 		super();
+		this.type = BeatType.Drag;
 	}
 	
 	public DragCircle(int x, int y, float dragTotal) {

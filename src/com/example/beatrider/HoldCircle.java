@@ -6,6 +6,7 @@ import android.graphics.Paint.Align;
 import android.graphics.Paint.Style;
 import android.util.Log;
 
+import com.example.beatrider.Beat.BeatType;
 import com.kilobolt.framework.Graphics;
 import com.kilobolt.framework.Input.TouchEvent;
 
@@ -27,6 +28,8 @@ public class HoldCircle extends BeatCircle {
 	
 	public HoldCircle(int x, int y, float holdDuration) {
 		setInitialization(x, y, holdDuration);		
+		this.type = BeatType.Hold;
+
 	}
 	
 	void setInitialization(int x, int y, float holdDuration) {

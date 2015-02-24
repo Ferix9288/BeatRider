@@ -7,6 +7,7 @@ import android.graphics.Paint.Align;
 import android.graphics.Paint.Style;
 import android.util.Log;
 
+import com.example.beatrider.Beat.BeatType;
 import com.example.beatrider.GameUtil.Rating;
 import com.kilobolt.framework.Graphics;
 import com.kilobolt.framework.Input.TouchEvent;
@@ -38,6 +39,8 @@ public class BeatCircle extends GameObject {
 	int xLeft, xRight, yDown, yUp; //Hitbox
 	int startingX, startingY;
 	int state;
+	BeatType type;
+
 	float startTime;
 	Rating rating;
 	int wordLifeSpan;
@@ -47,6 +50,8 @@ public class BeatCircle extends GameObject {
 	
 	
 	public BeatCircle() {
+		
+		this.type = BeatType.SingleTap;
 		
         // Defining a paint object
         this.paint = new Paint();
