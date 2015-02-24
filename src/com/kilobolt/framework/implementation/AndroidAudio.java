@@ -7,13 +7,16 @@ import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.media.AudioManager;
 import android.media.SoundPool;
+import android.util.Log;
 
 import com.kilobolt.framework.Audio;
 import com.kilobolt.framework.Music;
 import com.kilobolt.framework.Sound;
 
 public class AndroidAudio implements Audio {
-    AssetManager assets;
+    private static final String TAG = "Android Audio";
+    private static final boolean DEBUG = true;
+	AssetManager assets;
     SoundPool soundPool;
 
     public AndroidAudio(Activity activity) {
@@ -24,10 +27,15 @@ public class AndroidAudio implements Audio {
 
     @Override
     public Music createMusic(String filename) {
-        try {
+    	if (DEBUG) Log.i(TAG, "In Create music :: " + filename);
+
+    	try {
             AssetFileDescriptor assetDescriptor = assets.openFd(filename);
             return new AndroidMusic(assetDescriptor);
         } catch (IOException e) {
+        	Log.e(TAG, "IO Exception. Couldn't Load music " + filename);
+            throw new RuntimeException("Couldn't load music '" + filename + "'");
+        } catch (Exception e) {
             throw new RuntimeException("Couldn't load music '" + filename + "'");
         }
     }

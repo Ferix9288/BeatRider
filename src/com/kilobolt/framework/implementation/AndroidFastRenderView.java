@@ -9,7 +9,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 public class AndroidFastRenderView extends SurfaceView implements Runnable {
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 	private static final String TAG = "Android Fast Render";
 
 	AndroidGame game;

@@ -10,7 +10,7 @@ public class Pool<T> {
         public T createObject();
     }
 
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 
 	private static final String TAG = "Pool";
 

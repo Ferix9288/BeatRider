@@ -14,6 +14,7 @@ import com.example.beatrider.Beat.BeatType;
 import com.kilobolt.framework.Game;
 import com.kilobolt.framework.Graphics;
 import com.kilobolt.framework.Image;
+import com.kilobolt.framework.Music;
 import com.kilobolt.framework.Pool;
 import com.kilobolt.framework.Screen;
 import com.kilobolt.framework.Input.TouchEvent;
@@ -24,7 +25,7 @@ public class GameScreen extends Screen {
         Ready, Running, Paused, GameOver
     }
 
-	private static final boolean DEBUG = false;
+	private static final boolean DEBUG = true;
 	private static final boolean SHOW_FPS = false;
 	private static final int MAX_AT_PLAY = 20;
 
@@ -141,6 +142,11 @@ public class GameScreen extends Screen {
         GameTimer = 0;
         CountDown = MOCK_TOP;
         beatIndex = 0;
+        
+        state = GameState.Ready;
+        
+//        Assets.song = game.getAudio().createMusic("BestDayCut.mp3");
+//        Assets.song.play();
     }
 
     @Override
@@ -177,13 +183,15 @@ public class GameScreen extends Screen {
         // When the user touches the screen, the game begins. 
         // state now becomes GameState.Running.
         // Now the updateRunning() method will be called!
-        
-        if (touchEvents.size() > 0)
-            state = GameState.Running;
+           	
+        if (touchEvents.size() > 0) {
+        	Assets.song = game.getAudio().createMusic("BestDayCut.mp3");
+        	Assets.song.play();
+        	state = GameState.Running;
+        }
     }
 
     private void generateBeats() {
-    	int currentBeats = inGameBeatCircles.size();
     	//if (DEBUG) Log.i(TAG, "generateBeats:" + currentBeats);
 
     	while (inQueueBeatCircles.size() < MAX_AT_PLAY && beatIndex < BeatPattern.size()) {
@@ -251,7 +259,7 @@ public class GameScreen extends Screen {
         
         int len = touchEvents.size();
         if (len == 0) {
-            if (DEBUG) Log.i(TAG, "updateRunning: Null Touch Events - " + deltaTime);
+            //if (DEBUG) Log.i(TAG, "updateRunning: Null Touch Events - " + deltaTime);
 
             for (int j = 0; j < inGameBeatCircles.size(); j++) {
             	BeatCircle beatCircle = inGameBeatCircles.get(j);
@@ -263,7 +271,7 @@ public class GameScreen extends Screen {
             	}
             }  	
         } else {
-            if (DEBUG) Log.i(TAG, "updateRunning: Time - " + deltaTime + "|touchEvents -" + touchEvents);
+            //if (DEBUG) Log.i(TAG, "updateRunning: Time - " + deltaTime + "|touchEvents -" + touchEvents);
 
 	        for (int i = 0; i < len; i++) {
 	            TouchEvent event = touchEvents.get(i);
@@ -385,18 +393,12 @@ public class GameScreen extends Screen {
         // Secondly, draw the UI above the game elements.
         if (state == GameState.Ready) {
             drawReadyUI();
-        }
-        
-        if (state == GameState.Running) {
+        } else  if (state == GameState.Running) {
             drawRunningUI();
         	drawRunning(deltaTime);
-        }
-        
-        if (state == GameState.Paused) {
+        } else if (state == GameState.Paused) {
             drawPausedUI();
-        }
-        
-        if (state == GameState.GameOver) {
+        } else if (state == GameState.GameOver) {
             drawGameOverUI();
         }
         
