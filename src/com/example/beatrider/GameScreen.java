@@ -475,7 +475,6 @@ public class GameScreen extends Screen {
     public void pause() {
         if (state == GameState.Running)
             state = GameState.Paused;
-
     }
 
     @Override
