@@ -24,12 +24,11 @@ public class HoldCircle extends BeatCircle {
 	
 	public HoldCircle() {
 		super();
+		this.type = BeatType.Hold;
 	}
 	
 	public HoldCircle(int x, int y, float holdDuration) {
 		setInitialization(x, y, holdDuration);		
-		this.type = BeatType.Hold;
-
 	}
 	
 	void setInitialization(int x, int y, float holdDuration) {
@@ -37,6 +36,8 @@ public class HoldCircle extends BeatCircle {
 		
 		this.holdDuration = holdDuration;
 		this.holdUserDuration = 0;
+		
+		this.type = BeatType.Hold;
 	}
 	
 	@Override

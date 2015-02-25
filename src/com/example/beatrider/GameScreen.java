@@ -200,8 +200,10 @@ public class GameScreen extends Screen {
     	while (inQueueBeatCircles.size() < MAX_AT_PLAY && beatIndex < selectedSong.beatPattern.size()) {
     		Beat currentBeat = selectedSong.beatPattern.get(beatIndex);
     		float startTime = currentBeat.startTime;
+    		
     		switch(currentBeat.type) {
 				case SingleTap:
+		    		if (DEBUG) Log.i(TAG, "SingleTap.");
 					BeatCircle newBeatCircle = beatCirclePool.newObject();
 					newBeatCircle.setInitialization(Integer.parseInt(currentBeat.parameters[0]),
 							Integer.parseInt(currentBeat.parameters[1]));
@@ -210,6 +212,7 @@ public class GameScreen extends Screen {
 					break;
 
 				case MultipleTap:
+		    		if (DEBUG) Log.i(TAG, "MultipleTap.");
 					TapCircle newTapCircle = tapCirclePool.newObject();
 					//Parse the Float Array
 					String floatArrayString = currentBeat.parameters[2];

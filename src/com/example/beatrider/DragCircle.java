@@ -39,7 +39,7 @@ public class DragCircle extends BeatCircle {
 	}
 	
 	public DragCircle(int x, int y, float dragTotal) {
-		setInitialization(x, y, dragTotal);		
+		setInitialization(x, y, dragTotal);
 	}
 	
 	void setInitialization(int x, int y, float dragTotal) {
@@ -53,6 +53,7 @@ public class DragCircle extends BeatCircle {
 		dragIndex = 0;
 		
 		createDragPath();				
+		this.type = BeatType.Drag;
 	}
 	
 	void createDragPath() {

@@ -50,7 +50,21 @@ class BeatCircle:
         self.boxTop = yLocation - totalBoundary
         self.boxBottom = yLocation + totalBoundary
 
+        #Single Tap (Default)
         self.circleType = SINGLE_TAP
+
+        #Multiple Tap
+        self.tapInterval = [0]
+        self.tapCount = 1
+
+    def relocate(self, xLocation, yLocation):
+        self.x = xLocation
+        self.y = yLocation
+
+        self.boxLeft = xLocation - totalBoundary
+        self.boxRight = xLocation + totalBoundary
+        self.boxTop = yLocation - totalBoundary
+        self.boxBottom = yLocation + totalBoundary
 
     def setType(self, beatCircleType):
         self.circleType = beatCircleType
@@ -104,6 +118,7 @@ def main():
             if ( not( foundOffset) ):
                 foundOffset = True
                 offset = currentTime
+                previousTimeToAppear = offset
 
         currentTime = timeInMiliseconds-offset;
 
@@ -117,9 +132,17 @@ def main():
 
             overlap = True
     
-            suggestedBeatCircle = BeatCircle(0, 0, 0)
+            suggestedBeatCircle = BeatCircle(0, 0, previousTimeToAppear)
 
-            print beatsInPlay
+            #print beatsInPlay
+            print beatsInBeatWindow
+
+            for beatTime in beatsInBeatWindow:
+                difference = beatTime - previousTimeToAppear
+                print difference
+                suggestedBeatCircle.setType(MULTIPLE_TAP)
+                suggestedBeatCircle.tapInterval.append(difference)
+                suggestedBeatCircle.tapCount += 1
 
             while(overlap):
 
@@ -132,8 +155,10 @@ def main():
                 else:
                     x = random.randint(totalBoundary, 1794-totalBoundary)
                     y = random.randint(totalBoundary, 1080-totalBoundary)
+
          
-                suggestedBeatCircle = BeatCircle(x, y, actualTimeToAppear)
+                suggestedBeatCircle.relocate(x, y)
+
                 overlap = False
                 for otherBeatCircle in beatsInPlay:
                     if suggestedBeatCircle.overlap(otherBeatCircle):
@@ -142,6 +167,7 @@ def main():
 
             beatsInPlay.append(suggestedBeatCircle)
             beatsInBeatWindow = []
+            previousTimeToAppear = actualTimeToAppear
 
         else:
             beatsInBeatWindow.append(actualTimeToAppear)
@@ -160,11 +186,23 @@ def main():
 def writeBeat(beatCircle):
     string = beatPatternArray + ".add( new Beat("
     beatType = beatCircle.circleType
+    beatArguments = ""
 
     if (beatType == SINGLE_TAP):
         beatArguments = "BeatType.SingleTap, new String[] {" + '"' + str(beatCircle.x) + '"' + ", " + '"' + str(beatCircle.y) + '"' + "}, " + str(beatCircle.time) + "f));"
         #print string+beatArguments
-        outFile.write(string+beatArguments+"\n")
+    elif (beatType == MULTIPLE_TAP):
+        stringArray = ""
+        for index in range(0, beatCircle.tapCount-1):
+            stringArray += str(beatCircle.tapInterval[index])
+            stringArray += ","
+        #Handle Last Float
+        stringArray += str(beatCircle.tapInterval[beatCircle.tapCount-1])
+
+        beatArguments = "BeatType.MultipleTap, new String[] {" + '"' + str(beatCircle.x) + '"' + ', "' + str(beatCircle.y) + '"' + ', "' + stringArray + '"' + ', "' + str(beatCircle.tapCount) + '"' + "}, " + str(beatCircle.time) + "f));"
+
+    outFile.write(string+beatArguments+"\n")
+
 
 
 if __name__ == '__main__':

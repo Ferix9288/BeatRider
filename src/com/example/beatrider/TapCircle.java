@@ -26,19 +26,22 @@ public class TapCircle extends BeatCircle {
 	
 	public TapCircle() {
 		super();
+		this.type = BeatType.MultipleTap;
 	}
 	
 	public TapCircle(int x, int y, float[] tapInterval, int tapCount) {
 		setInitialization(x, y, tapInterval, tapCount);		
-		this.type = BeatType.MultipleTap;
 	}
 	
 	void setInitialization(int x, int y, float[] tapInterval, int tapCount) {
 		super.setInitialization(x, y);
-		
 		this.tapInterval = tapInterval;
 		this.tapCount = tapCount;
-		this.tapUserDuration = 0;				
+		this.tapUserDuration = 0;	
+		this.tapIndex = 0;
+
+		this.type = BeatType.MultipleTap;
+
 	}
 	
 	@Override
@@ -112,11 +115,11 @@ public class TapCircle extends BeatCircle {
 					rating = GameUtil.Rating.Miss;
 					this.state = RATING;
 				} else if (e != null) {
-					if (isTouched(e.x, e.y)) {
+					if (e.type == TouchEvent.TOUCH_DOWN && isTouched(e.x, e.y)) {
 						//if (DEBUG) Log.i(TAG, "Touched: " + this.lifeSpan);
 						setRating();
 						if (this.rating == GameUtil.Rating.Good || this.rating == GameUtil.Rating.Perfect) {
-							tapIndex++;
+							if (tapIndex != tapCount -1) tapIndex++;
 							this.state = TAP;
 						} else {
 							this.state = RATING;
@@ -145,7 +148,7 @@ public class TapCircle extends BeatCircle {
 							if (this.rating == GameUtil.Rating.Bad) {
 								this.state = RATING;
 							}
-							tapIndex++;
+							if (tapIndex != tapCount -1) tapIndex++;
 							tapUserDuration = 0;
 						}
 					}
