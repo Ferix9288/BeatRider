@@ -35,6 +35,7 @@ public class Pool<T> {
         	if (DEBUG) Log.i (TAG, "Reuse Object. Id ::" + object.toString());
 
         }
+        if (object == null) object = factory.createObject(); 
         return object;
     }
 

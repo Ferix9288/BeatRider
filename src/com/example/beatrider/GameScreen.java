@@ -40,6 +40,8 @@ public class GameScreen extends Screen {
     private static final int MOCK_TOP = 50;
     int CountDown;
     int currentFPS;
+    
+    Song selectedSong = SongCollection.BestDay;
 
     /** 
      * Beat Circle Factory.
@@ -140,7 +142,7 @@ public class GameScreen extends Screen {
         report = new GameReport();
         
         GameTimer = 0;
-        CountDown = MOCK_TOP;
+        CountDown = selectedSong.duration;
         beatIndex = 0;
         
         state = GameState.Ready;
@@ -183,9 +185,10 @@ public class GameScreen extends Screen {
         // When the user touches the screen, the game begins. 
         // state now becomes GameState.Running.
         // Now the updateRunning() method will be called!
-           	
+
+    	//Log.e(TAG, "Width / Height : " + game.getGraphics().getWidth() + " " + game.getGraphics().getHeight());
         if (touchEvents.size() > 0) {
-        	Assets.song = game.getAudio().createMusic("BestDayCut.mp3");
+        	Assets.song = game.getAudio().createMusic(selectedSong.songFile);
         	Assets.song.play();
         	state = GameState.Running;
         }
@@ -194,8 +197,8 @@ public class GameScreen extends Screen {
     private void generateBeats() {
     	//if (DEBUG) Log.i(TAG, "generateBeats:" + currentBeats);
 
-    	while (inQueueBeatCircles.size() < MAX_AT_PLAY && beatIndex < BeatPattern.size()) {
-    		Beat currentBeat = BeatPattern.get(beatIndex);
+    	while (inQueueBeatCircles.size() < MAX_AT_PLAY && beatIndex < selectedSong.beatPattern.size()) {
+    		Beat currentBeat = selectedSong.beatPattern.get(beatIndex);
     		float startTime = currentBeat.startTime;
     		switch(currentBeat.type) {
 				case SingleTap:
@@ -319,7 +322,7 @@ public class GameScreen extends Screen {
         //Update Timer
         GameTimer += deltaTime;
         int deductSeconds = (int) (GameTimer / 1000);
-        CountDown = MOCK_TOP - deductSeconds;
+        CountDown = selectedSong.duration - deductSeconds;
         
         //Update FPS
         if (SHOW_FPS) {
@@ -382,7 +385,6 @@ public class GameScreen extends Screen {
     @Override
     public void paint(float deltaTime) {
         Graphics g = game.getGraphics();
-        g.clearScreen(Color.BLACK);
         
         // First draw the game elements.
 
@@ -392,9 +394,11 @@ public class GameScreen extends Screen {
 
         // Secondly, draw the UI above the game elements.
         if (state == GameState.Ready) {
-            drawReadyUI();
+            g.clearScreen(Color.BLACK);
+        	drawReadyUI();
         } else  if (state == GameState.Running) {
-            drawRunningUI();
+            g.clearScreen(Color.BLACK);
+        	drawRunningUI();
         	drawRunning(deltaTime);
         } else if (state == GameState.Paused) {
             drawPausedUI();
@@ -481,6 +485,7 @@ public class GameScreen extends Screen {
 
     @Override
     public void dispose() {
+    	Assets.song.dispose();
 
     }
 
