@@ -112,6 +112,7 @@ def main():
 
     offset = 0
     foundOffset = False
+    foundFirstBeat = False
 
     for line in beatFile:
         spaceDelimiter = line.split()
@@ -121,23 +122,29 @@ def main():
         timeInMiliseconds = float(extractedTime)*1000
         actualTimeToAppear = timeInMiliseconds - ON_DURATION
 
+        if ( not( foundOffset) ):
+            foundOffset = True
+            offset = timeInMiliseconds
+            print "offset: " + str(offset)
 
         if (actualTimeToAppear < 0): 
+            print actualTimeToAppear
             continue
         else:
-            if ( not( foundOffset) ):
-                foundOffset = True
-                offset = currentTime
-                previousTimeToAppear = offset
+            if (not (foundFirstBeat)):
+                previousTimeToAppear = actualTimeToAppear
+                foundFirstBeat = True
+
+
 
         currentTime = timeInMiliseconds-offset;
 
 
-        if ( currentTime > currentOnWindow*onWindow):
-            currentOnWindow += 1
+        # if ( currentTime > currentOnWindow*onWindow):
+        #     currentOnWindow += 1
 
 
-        elif ( currentTime-offset > currentBeatWindow*beatWindow):
+        if ( currentTime > currentBeatWindow*beatWindow):
             currentBeatWindow += 1
 
             overlap = True
