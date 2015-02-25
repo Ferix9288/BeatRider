@@ -9,7 +9,7 @@ MULTIPLE_TAP = 1
 HOLD = 2
 DRAG = 3
 
-ON_DURATION = 2000 
+ON_DURATION = 1500
 
 beatPatternArray = "bestDayBeatPattern"
 screenWidth = 1794
@@ -22,17 +22,27 @@ currentBeatWindow = 0
 beatWindow = 500
 beatsInBeatWindow = []
 
-totalBoundary = 140 #Number of Pixels each Circle needs to be separated from each other
+circleRadius = 100
+labelBoundary = 40
+widthBoundary = circleRadius #Number of Pixels each Circle needs to be separated from each other (from the center)
+topBoundary = circleRadius + labelBoundary
+bottomBoundary = circleRadius
 
-LEFT_TO_RIGHT = 0
-RIGHT_TO_LEFT = 1
-TOP_TO_BOTTOM = 2
-BOTTOM_TOP_TOP = 3
 
-pathX = 0
-pathY = 0
+LEFT_TO_RIGHT_TOP_HALF = 0
+LEFT_TO_RIGHT_BOTTOM_HALF = 1
+RIGHT_TO_LEFT_TOP_HALF = 2
+RIGHT_TO_LEFT_BOTTOM_HALF = 3
+DIAGONAL_DOWNLEFT_UPRIGHT = 4
+DIAGONAL_UPLEFT_DOWNRIGHT = 5
+DIAGONAL_DOWNRIGHT_UPLEFT = 6
+DIAGONAL_UPRIGHT_DOWNLEFT = 7
 
-currentPath = LEFT_TO_RIGHT
+
+pathX = widthBoundary
+pathY = topBoundary
+
+currentPath = LEFT_TO_RIGHT_TOP_HALF
 
 currentOnWindow = 0
 onWindow = ON_DURATION
@@ -45,10 +55,10 @@ class BeatCircle:
         self.y = yLocation
         self.time = time
 
-        self.boxLeft = xLocation - totalBoundary
-        self.boxRight = xLocation + totalBoundary
-        self.boxTop = yLocation - totalBoundary
-        self.boxBottom = yLocation + totalBoundary
+        self.boxLeft = xLocation - widthBoundary
+        self.boxRight = xLocation + widthBoundary
+        self.boxTop = yLocation - topBoundary
+        self.boxBottom = yLocation + bottomBoundary
 
         #Single Tap (Default)
         self.circleType = SINGLE_TAP
@@ -61,10 +71,10 @@ class BeatCircle:
         self.x = xLocation
         self.y = yLocation
 
-        self.boxLeft = xLocation - totalBoundary
-        self.boxRight = xLocation + totalBoundary
-        self.boxTop = yLocation - totalBoundary
-        self.boxBottom = yLocation + totalBoundary
+        self.boxLeft = xLocation - widthBoundary
+        self.boxRight = xLocation + widthBoundary
+        self.boxTop = yLocation - topBoundary
+        self.boxBottom = yLocation + bottomBoundary
 
     def setType(self, beatCircleType):
         self.circleType = beatCircleType
@@ -78,17 +88,17 @@ class BeatCircle:
         return (self.overlapWidth(otherBeatCircle) and self.overlapHeight(otherBeatCircle))
 
     def overlapWidth(self, otherBeatCircle):
-        if (self.boxLeft >= otherBeatCircle.boxLeft and self.boxLeft <= otherBeatCircle.boxRight):
+        if (self.boxLeft > otherBeatCircle.boxLeft and self.boxLeft < otherBeatCircle.boxRight):
             return True
-        elif (self.boxRight >= otherBeatCircle.boxLeft and self.boxRight <= otherBeatCircle.boxRight):
+        elif (self.boxRight > otherBeatCircle.boxLeft and self.boxRight < otherBeatCircle.boxRight):
             return True
         else:
             return False
 
     def overlapHeight(self, otherBeatCircle):
-        if (self.boxTop >= otherBeatCircle.boxTop and self.boxTop <= otherBeatCircle.boxBottom):
+        if (self.boxTop > otherBeatCircle.boxTop and self.boxTop < otherBeatCircle.boxBottom):
             return True
-        elif (self.boxBottom >= otherBeatCircle.boxTop and self.boxBottom <= otherBeatCircle.boxBottom):
+        elif (self.boxBottom > otherBeatCircle.boxTop and self.boxBottom < otherBeatCircle.boxBottom):
             return True
         else:
             return False
@@ -135,7 +145,7 @@ def main():
             suggestedBeatCircle = BeatCircle(0, 0, previousTimeToAppear)
 
             #print beatsInPlay
-            print beatsInBeatWindow
+            #print beatsInBeatWindow
 
             for beatTime in beatsInBeatWindow:
                 difference = beatTime - previousTimeToAppear
@@ -146,25 +156,29 @@ def main():
 
             while(overlap):
 
-                if (currentPath == LEFT_TO_RIGHT):
-                    pathX += totalBoundary
-                    if (pathX >= screenWidth):
-                        pathX = totalBoundary
+                if (currentPath == LEFT_TO_RIGHT_TOP_HALF or currentPath == RIGHT_TO_LEFT_TOP_HALF):
                     x = pathX
-                    y = random.randint(totalBoundary, 1080-totalBoundary) 
+                    y = random.randint(topBoundary, screenHeight/2)
+                elif (currentPath == LEFT_TO_RIGHT_BOTTOM_HALF or currentPath == RIGHT_TO_LEFT_BOTTOM_HALF):
+                    x = pathX
+                    y = random.randint(screenHeight/2, screenHeight-bottomBoundary) 
                 else:
-                    x = random.randint(totalBoundary, 1794-totalBoundary)
-                    y = random.randint(totalBoundary, 1080-totalBoundary)
-
+                    x = random.randint(widthBoundary, screenWidth-widthBoundary)
+                    y = random.randint(topBoundary, screenHeight-bottomBoundary)
          
                 suggestedBeatCircle.relocate(x, y)
 
                 overlap = False
                 for otherBeatCircle in beatsInPlay:
                     if suggestedBeatCircle.overlap(otherBeatCircle):
+                        print "suggested X : " +  str(suggestedBeatCircle.x) + " | suggestedY: " + str(suggestedBeatCircle.y)
+                        print "otherBeatCircleX: " + str(otherBeatCircle.x) + " | otherBeatCircleY:" + str(otherBeatCircle.y)
                         overlap = True
                         break;
 
+            #On success
+            incrementPath()
+                
             beatsInPlay.append(suggestedBeatCircle)
             beatsInBeatWindow = []
             previousTimeToAppear = actualTimeToAppear
@@ -182,6 +196,50 @@ def main():
         writeBeat(beatCircle)
     
     beatFile.close()
+
+def switchPath():
+    global currentPath
+
+    if (currentPath == LEFT_TO_RIGHT_TOP_HALF): 
+        choices =  [LEFT_TO_RIGHT_BOTTOM_HALF, RIGHT_TO_LEFT_BOTTOM_HALF]
+        currentPath = random.choice( choices)
+
+    elif (currentPath == LEFT_TO_RIGHT_BOTTOM_HALF):
+        choices =  [LEFT_TO_RIGHT_TOP_HALF, RIGHT_TO_LEFT_TOP_HALF]
+        currentPath = random.choice( choices)
+
+    elif (currentPath == RIGHT_TO_LEFT_TOP_HALF):
+        choices =  [LEFT_TO_RIGHT_BOTTOM_HALF, RIGHT_TO_LEFT_BOTTOM_HALF]
+        currentPath = random.choice( choices)
+
+    elif (currentPath == RIGHT_TO_LEFT_BOTTOM_HALF):
+        choices =  [LEFT_TO_RIGHT_TOP_HALF, RIGHT_TO_LEFT_TOP_HALF]
+        currentPath = random.choice( choices)
+
+    setUpPath()
+
+def setUpPath():
+    global currentPath
+    global pathX, pathY
+    if (currentPath == LEFT_TO_RIGHT_TOP_HALF or currentPath == LEFT_TO_RIGHT_BOTTOM_HALF): 
+        pathX = widthBoundary
+    elif (currentPath == RIGHT_TO_LEFT_TOP_HALF or currentPath == RIGHT_TO_LEFT_BOTTOM_HALF):
+        pathX = screenWidth - widthBoundary
+
+def incrementPath():
+    global currentPath, pathX, pathY
+    if (currentPath == LEFT_TO_RIGHT_TOP_HALF or currentPath == LEFT_TO_RIGHT_BOTTOM_HALF):
+        if (pathX > screenWidth-widthBoundary):
+            switchPath()
+        else: 
+            pathX += widthBoundary*2;
+    elif (currentPath == RIGHT_TO_LEFT_TOP_HALF or currentPath == RIGHT_TO_LEFT_BOTTOM_HALF):
+        if (pathX < widthBoundary):
+            switchPath()
+        else: 
+            pathX -= widthBoundary*2;
+
+
 
 def writeBeat(beatCircle):
     string = beatPatternArray + ".add( new Beat("
