@@ -211,9 +211,18 @@ public class GameScreen extends Screen {
 
 				case MultipleTap:
 					TapCircle newTapCircle = tapCirclePool.newObject();
+					//Parse the Float Array
+					String floatArrayString = currentBeat.parameters[2];
+					String[] floatArrayDelimited = floatArrayString.split(",");
+					
+					float[] floatArray = new float[floatArrayDelimited.length];
+					for (int i = 0; i < floatArrayDelimited.length; i++) {
+						floatArray[i] = Float.parseFloat(floatArrayDelimited[i]);
+					}
+					
 					newTapCircle.setInitialization(Integer.parseInt(currentBeat.parameters[0]),
 							Integer.parseInt(currentBeat.parameters[1]), 
-							Float.parseFloat(currentBeat.parameters[2]), 
+							floatArray, 
 							Integer.parseInt(currentBeat.parameters[3]));
 					newTapCircle.startTime = startTime;
 					inQueueBeatCircles.add(newTapCircle);

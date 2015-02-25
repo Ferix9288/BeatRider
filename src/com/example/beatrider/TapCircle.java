@@ -19,7 +19,7 @@ public class TapCircle extends BeatCircle {
 	
 	
 	//Additional Instance Variables
-	float tapInterval;
+	float[] tapInterval;
 	float tapUserDuration;
 	int tapCount;
 	int tapIndex;
@@ -28,12 +28,12 @@ public class TapCircle extends BeatCircle {
 		super();
 	}
 	
-	public TapCircle(int x, int y, float tapInterval, int tapCount) {
+	public TapCircle(int x, int y, float[] tapInterval, int tapCount) {
 		setInitialization(x, y, tapInterval, tapCount);		
 		this.type = BeatType.MultipleTap;
 	}
 	
-	void setInitialization(int x, int y, float tapInterval, int tapCount) {
+	void setInitialization(int x, int y, float[] tapInterval, int tapCount) {
 		super.setInitialization(x, y);
 		
 		this.tapInterval = tapInterval;
@@ -91,7 +91,8 @@ public class TapCircle extends BeatCircle {
         this.paint.setStrokeWidth(10);
 
 		for (int i = tapIndex; i < tapCount; i++) {
-			float sweepAngle = 360 * (lifeSpan/ (ON_DURATION + tapInterval*i) );
+			
+			float sweepAngle = 360 * (lifeSpan/ (ON_DURATION + tapInterval[i]) );
 	        g.drawArc(xLeft-TIME_ARC_DIST, yUp-TIME_ARC_DIST, 
 	        		xRight+TIME_ARC_DIST, yDown+TIME_ARC_DIST, -90, sweepAngle, true, paint);		
 		}
@@ -129,7 +130,7 @@ public class TapCircle extends BeatCircle {
 			case TAP: {
 				if (DEBUG) Log.i(TAG, "In Tap State: Duration - " + tapUserDuration
 						+ "|| tapInterval - " + tapInterval);
-				if (tapUserDuration > tapInterval + LENIENCY) {
+				if (tapUserDuration > tapInterval[tapIndex] + LENIENCY) {
 					//User missed a tap
 					if (DEBUG) Log.i(TAG, "Timer Ran out.");
 					rating = GameUtil.Rating.Miss;
@@ -170,9 +171,9 @@ public class TapCircle extends BeatCircle {
 	}
 	
 	void setTapRating() {
-		float TAP_OK_TIMING = tapInterval*.6f;
-		float TAP_GOOD_TIMING = tapInterval*.8f;
-		float TAP_PERFECT_TIMING = tapInterval*.95f;
+		float TAP_OK_TIMING = (tapInterval[tapIndex]-tapInterval[tapIndex-1])*.6f;
+		float TAP_GOOD_TIMING = (tapInterval[tapIndex]-tapInterval[tapIndex-1])*.8f;
+		float TAP_PERFECT_TIMING = (tapInterval[tapIndex]-tapInterval[tapIndex-1])*.95f;
 		
 		if (tapUserDuration >= TAP_OK_TIMING) {
 			rating = GameUtil.Rating.Perfect;
