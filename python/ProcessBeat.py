@@ -1,13 +1,14 @@
 import random
 
 
-beatFile = open("BestDayBeatsManual.txt", 'r')
+beatFile = open("BestDayBeatsManual2.txt", 'r')
 outFile = open("output.txt", 'w')
 
 SINGLE_TAP = 0
 MULTIPLE_TAP = 1
 HOLD = 2
 DRAG = 3
+DOUBLE = 4
 
 ON_DURATION = 1500
 
@@ -22,8 +23,8 @@ currentBeatWindow = 0
 beatWindow = 500
 beatsInBeatWindow = []
 
-circleRadius = 100
-labelBoundary = 40
+circleRadius = 120
+labelBoundary = 50
 widthBoundary = circleRadius #Number of Pixels each Circle needs to be separated from each other (from the center)
 topBoundary = circleRadius + labelBoundary
 bottomBoundary = circleRadius
@@ -37,6 +38,8 @@ DIAGONAL_DOWNLEFT_UPRIGHT = 4
 DIAGONAL_UPLEFT_DOWNRIGHT = 5
 DIAGONAL_DOWNRIGHT_UPLEFT = 6
 DIAGONAL_UPRIGHT_DOWNLEFT = 7
+ALTERNATING_LEFT_RIGHT_TOP_TO_BOTTOM = 8
+ALTERNATIVE_LEFT_RIGHT_BOTTOM_TO_TOP = 9
 
 
 pathX = widthBoundary
@@ -66,6 +69,16 @@ class BeatCircle:
         #Multiple Tap
         self.tapInterval = [0]
         self.tapCount = 1
+
+        #Hold Circle
+        self.holdDuration = beatWindow
+
+        #Drag Circle
+        self.dragPoints = []
+        self.dragTimes = []
+
+        #Drag Circle Path
+        self.dragCirclePath = False
 
     def relocate(self, xLocation, yLocation):
         self.x = xLocation
@@ -113,11 +126,24 @@ def main():
     offset = 0
     foundOffset = False
     foundFirstBeat = False
-
+    manualCircleLabel = SINGLE_TAP
     for line in beatFile:
         spaceDelimiter = line.split()
         extractedTime = spaceDelimiter[0]
 
+        if (len(spaceDelimiter) >= 3):
+            manualLabelString = spaceDelimiter[2]
+            print manualLabelString
+            if (manualLabelString == "H"):
+                manualCircleLabel = HOLD
+            elif (manualLabelString == "D"):
+                manualCircleLabel = DRAG
+            elif (manualLabelString == "DB"):
+                manualCircleLabel = DOUBLE
+
+            print "manualCircleLabel:" + str(manualCircleLabel)
+        else:
+            manualCircleLabel = SINGLE_TAP
 
         timeInMiliseconds = float(extractedTime)*1000
         actualTimeToAppear = timeInMiliseconds - ON_DURATION
@@ -154,12 +180,29 @@ def main():
             #print beatsInPlay
             #print beatsInBeatWindow
 
-            for beatTime in beatsInBeatWindow:
-                difference = beatTime - previousTimeToAppear
-                print difference
-                suggestedBeatCircle.setType(MULTIPLE_TAP)
-                suggestedBeatCircle.tapInterval.append(difference)
-                suggestedBeatCircle.tapCount += 1
+
+            if ( len(beatsInBeatWindow) > 0):
+                suggestedBeatCircle.setType(MULTIPLE_TAP)    
+                for beatTime in beatsInBeatWindow:
+                    difference = beatTime - previousTimeToAppear
+                    suggestedBeatCircle.tapInterval.append(difference)
+                    suggestedBeatCircle.tapCount += 1
+            else: 
+                if (manualCircleLabel != SINGLE_TAP):
+                    if (manualCircleLabel == HOLD):
+                        suggestedBeatCircle.setType(HOLD)
+                        suggestedBeatCircle.holdDuration = actualTimeToAppear-previousTimeToAppear
+                    elif (manualCircleLabel == DRAG):
+                        empty = 0
+
+                    elif (manualCircleLabel == DOUBLE):
+                        empty = 0
+                # timeLapse = actualTimeToAppear-previousTimeToAppear
+                # if (timeLapse > beatWindow*1.5):
+                #     suggestedBeatCircle.setType(DRAG)
+                #     suggestedBeatCircle.dragDuration = timeLapse
+
+
 
             while(overlap):
 
@@ -204,6 +247,17 @@ def main():
     
     beatFile.close()
 
+def incrementPath():
+    global currentPath, pathX, pathY
+    if (currentPath == LEFT_TO_RIGHT_TOP_HALF or currentPath == LEFT_TO_RIGHT_BOTTOM_HALF):
+        pathX += widthBoundary*2;
+        if (pathX > screenWidth-widthBoundary):
+            switchPath()
+    elif (currentPath == RIGHT_TO_LEFT_TOP_HALF or currentPath == RIGHT_TO_LEFT_BOTTOM_HALF):
+        pathX -= widthBoundary*2;
+        if (pathX < widthBoundary):
+            switchPath()
+
 def switchPath():
     global currentPath
 
@@ -233,18 +287,7 @@ def setUpPath():
     elif (currentPath == RIGHT_TO_LEFT_TOP_HALF or currentPath == RIGHT_TO_LEFT_BOTTOM_HALF):
         pathX = screenWidth - widthBoundary
 
-def incrementPath():
-    global currentPath, pathX, pathY
-    if (currentPath == LEFT_TO_RIGHT_TOP_HALF or currentPath == LEFT_TO_RIGHT_BOTTOM_HALF):
-        if (pathX > screenWidth-widthBoundary):
-            switchPath()
-        else: 
-            pathX += widthBoundary*2;
-    elif (currentPath == RIGHT_TO_LEFT_TOP_HALF or currentPath == RIGHT_TO_LEFT_BOTTOM_HALF):
-        if (pathX < widthBoundary):
-            switchPath()
-        else: 
-            pathX -= widthBoundary*2;
+
 
 
 
@@ -263,8 +306,14 @@ def writeBeat(beatCircle):
             stringArray += ","
         #Handle Last Float
         stringArray += str(beatCircle.tapInterval[beatCircle.tapCount-1])
-
         beatArguments = "BeatType.MultipleTap, new String[] {" + '"' + str(beatCircle.x) + '"' + ', "' + str(beatCircle.y) + '"' + ', "' + stringArray + '"' + ', "' + str(beatCircle.tapCount) + '"' + "}, " + str(beatCircle.time) + "f));"
+
+    elif (beatType == HOLD): 
+        beatArguments = "BeatType.Hold, new String[] {" + '"' + str(beatCircle.x) + '"' + ', "' + str(beatCircle.y) + '"' + ', "' + str(beatCircle.holdDuration) + '"' + "}, " + str(beatCircle.time) + "f));"
+        
+    elif (beatType == DRAG):
+        beatArguments = "BeatType.Drag, new String[] {" + '"' + str(beatCircle.x) + '"' + ", " + '"' + str(beatCircle.y) + '"' +', "' + str(beatCircle.dragDuration) + '"' + "}, " + str(beatCircle.time) + "f));"
+   
 
     outFile.write(string+beatArguments+"\n")
 

@@ -46,7 +46,7 @@ public class HoldCircle extends BeatCircle {
 		switch(this.state) {
 			case ON: {
 				lifeSpan += deltaTime;
-				g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, Color.RED,  Style.STROKE);
+				g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, 0xFFFF6600,  Style.STROKE);
 				drawTimeArc(g);
 				if (lifeSpan >= OK_TIMING) {
 					drawLabel(g,"Hold!");									
