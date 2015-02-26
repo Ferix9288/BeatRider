@@ -15,7 +15,7 @@ import com.kilobolt.framework.Input.TouchEvent;
 public class DragCircle extends BeatCircle {
 
 	static final int DRAG = 4;
-	static final int DRAG_DIVIDER = 50;
+	static final int DRAG_DIVIDER = 40;
 	static final int DRAG_INCREMENT = 20;
 	
 	static final int DRAG_RESILIENCE = 5;
@@ -31,6 +31,7 @@ public class DragCircle extends BeatCircle {
 	
 	ArrayList<Point> dragUserPath = new ArrayList<Point>();
 	ArrayList<Point> dragTemplatePath = new ArrayList<Point>();
+	int drawIndex;
 	int dragIndex;
 
 	
@@ -53,30 +54,10 @@ public class DragCircle extends BeatCircle {
 		dragUserPath.clear();
 		dragTemplatePath.clear();
 		dragIndex = 0;
+		drawIndex = 0;
 		
 		//createDragPath();				
 		this.type = BeatType.Drag;
-	}
-	
-	void createDragPath() {
-		Random r = new Random();
-		int previousX = startingX; 
-		int previousY = startingY;
-		for (int i = DRAG_DIVIDER; i < (int) this.dragTimes[dragIndex]; i+= DRAG_DIVIDER) {
-			float sign = r.nextFloat();
-			if (sign <= 0.5) {
-				sign = -1;
-			} else {
-				sign = 1;
-			}
-			
-			int randomYIncrement = (int) ( (r.nextInt(5) + 3) * sign);
-			previousX = previousX + DRAG_INCREMENT;
-			previousY = previousY + randomYIncrement;
-			Point newPoint = new Point(previousX, previousY);
-			dragTemplatePath.add(newPoint);
-		}
-
 	}
 	
 	@Override
@@ -129,17 +110,28 @@ public class DragCircle extends BeatCircle {
 	
 	void drawDragTemplatePath(Graphics g) {
 		
+		if (drawIndex > 0) {
+			g.drawCircle(this.startingX, this.startingY, CIRCLE_RADIUS, 0xFFFFFF00,  Style.STROKE);
+
+		}
 		for (int i = 0; i < dragPoints.size(); i++) {
-			if (i <= dragIndex) {
+			if (i <= drawIndex) {
 				Point p = dragPoints.get(i);
 				paint.setStrokeWidth(1);
 				g.drawCircle(p.x, p.y, CIRCLE_RADIUS, 0xFFFFFF00,  Style.STROKE);
 				paint.setStrokeWidth(3);
-				g.drawLine(this.startingX, this.startingY, p.x, p.y, Color.WHITE);
+				Point previousPoint;
+				if (i == 0) {
+					previousPoint = new Point(this.startingX, this.startingY);
+				} else {
+					previousPoint = this.dragPoints.get(i-1);
+				}
+				g.drawLine(previousPoint.x, previousPoint.y, p.x, p.y, Color.WHITE);
 			}
 		}
 
 	}
+
 	
 	@Override
 	void update(TouchEvent e) {
@@ -158,7 +150,8 @@ public class DragCircle extends BeatCircle {
 						//if (DEBUG) Log.i(TAG, "Touched: " + this.lifeSpan);
 						setRating();
 						if (this.rating == GameUtil.Rating.Good || this.rating == GameUtil.Rating.Perfect) {
-							createDragPath2();
+							drawIndex++;
+							createDragPath();
 							this.dragPointer = e.pointer;
 							this.state = DRAG;
 						} else {
@@ -182,10 +175,9 @@ public class DragCircle extends BeatCircle {
 							if (e.type == TouchEvent.TOUCH_DRAGGED && isTouched(e.x, e.y)) {
 								if (DEBUG) Log.i(TAG, "In State Drag: Touched.");
 								if (dragUserDuration > dragTimes[dragIndex] && dragIndex < (dragPoints.size()-1)) {
-									Log.e(TAG, "GOT HERE. " + (dragPoints.size()-1));
 									dragIndex++;
-									createDragPath2();
-									
+									if (drawIndex != dragPoints.size()-1) drawIndex++;
+									createDragPath();									
 								}
 								this.resilience = 0;
 							} else { //User Lifted Pointer Up/Missed Circle
@@ -227,25 +219,7 @@ public class DragCircle extends BeatCircle {
 		} //end switch
 	}
 	
-	void setDragRating() {
-		
-		float DRAG_OK_TIMING = dragTimes[dragPoints.size()-1]*.6f;
-		float DRAG_GOOD_TIMING = dragTimes[dragPoints.size()-1]*.8f;
-		float DRAG_PERFECT_TIMING = dragTimes[dragPoints.size()-1]*.95f;
-		
-		if (dragUserDuration >= DRAG_PERFECT_TIMING) {
-			rating = GameUtil.Rating.Perfect;
-		} else if (dragUserDuration >= DRAG_GOOD_TIMING) {
-			rating = GameUtil.Rating.Good;
-		} else if (dragUserDuration >= DRAG_OK_TIMING) {
-			rating = GameUtil.Rating.Ok;
-		} else {
-			rating = GameUtil.Rating.Bad;
-		}		
-	}
-	
-	
-	void createDragPath2() {
+	void createDragPath() {
 
 		Point destinationPoint = dragPoints.get(dragIndex);
 		Point previousPoint;
@@ -273,13 +247,31 @@ public class DragCircle extends BeatCircle {
 
 			
 	}
+	
+	void setDragRating() {
+		
+		float DRAG_OK_TIMING = dragTimes[dragPoints.size()-1]*.6f;
+		float DRAG_GOOD_TIMING = dragTimes[dragPoints.size()-1]*.8f;
+		float DRAG_PERFECT_TIMING = dragTimes[dragPoints.size()-1]*.95f;
+		
+		if (dragUserDuration >= DRAG_PERFECT_TIMING) {
+			rating = GameUtil.Rating.Perfect;
+		} else if (dragUserDuration >= DRAG_GOOD_TIMING) {
+			rating = GameUtil.Rating.Good;
+		} else if (dragUserDuration >= DRAG_OK_TIMING) {
+			rating = GameUtil.Rating.Ok;
+		} else {
+			rating = GameUtil.Rating.Bad;
+		}		
+	}
+	
 	void updateLocation() {
 		
 		int currentIndex;
 		if (dragIndex == 0) {
-			currentIndex = (int) (dragUserDuration / dragTimes[dragIndex] * (dragUserPath.size()-1) );
+			currentIndex = (int) (dragUserDuration / dragTimes[dragIndex] * dragUserPath.size() );
 		} else {
-			currentIndex = (int) ( (dragUserDuration-dragTimes[dragIndex-1]) / dragTimes[dragIndex] * (dragUserPath.size()-1) );
+			currentIndex = (int) ( (dragUserDuration-dragTimes[dragIndex-1]) / (dragTimes[dragIndex]-dragTimes[dragIndex-1]) * dragUserPath.size() );
 		}
 		
 		if (currentIndex >= dragUserPath.size()) {
