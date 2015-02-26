@@ -31,6 +31,8 @@ public interface Graphics {
 
 	public Canvas getCanvas();
 	
+	public Paint getPaint();
+	
 	public int getWidth();
 
 	public int getHeight();

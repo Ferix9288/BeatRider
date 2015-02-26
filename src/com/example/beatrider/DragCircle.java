@@ -66,7 +66,7 @@ public class DragCircle extends BeatCircle {
 		switch(this.state) {
 			case ON: {
 				lifeSpan += deltaTime;
-				g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, Color.RED,  Style.STROKE);
+				drawBeatCircle(g);
 				drawTimeArc(g);
 				drawDragTemplatePath(g);
 				if (lifeSpan >= OK_TIMING) {

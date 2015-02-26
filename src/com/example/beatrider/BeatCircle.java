@@ -50,15 +50,7 @@ public class BeatCircle extends GameObject {
 	
 	
 	public BeatCircle() {
-		
-		this.type = BeatType.SingleTap;
-		
-        // Defining a paint object
-        this.paint = new Paint();
-        this.paint.setTextSize(50);
-        this.paint.setTextAlign(Paint.Align.CENTER);
-        this.paint.setAntiAlias(true);
-        this.paint.setColor(Color.WHITE);        
+		this.type = BeatType.SingleTap;		
 	}
 	
 	public BeatCircle(int x, int y) {
@@ -81,7 +73,15 @@ public class BeatCircle extends GameObject {
 		this.wordLifeSpan = 0;
 		this.alpha = 0xFF;
 	}
-			
+	
+	void setPaint(Paint globalPaint) {
+		this.paint = globalPaint;
+		this.paint.setTextSize(50);
+        this.paint.setTextAlign(Paint.Align.CENTER);
+        this.paint.setAntiAlias(true);
+        this.paint.setColor(Color.WHITE);
+	}
+ 			
 	@Override
 	void draw(Graphics g, float deltaTime) {
 		
@@ -92,7 +92,7 @@ public class BeatCircle extends GameObject {
 			}
 			case ON: {
 				lifeSpan += deltaTime;
-				g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, Color.RED,  Style.STROKE);
+				drawBeatCircle(g);
 				drawTimeArc(g);
 				break;
 				//else time runs out
@@ -109,7 +109,11 @@ public class BeatCircle extends GameObject {
 			}
 		} //end switch
 	}
-	
+
+	void drawBeatCircle(Graphics g) {
+		this.paint.setStrokeWidth(1);
+		g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, Color.RED,  Style.STROKE);
+	}
 	void drawTimeArc(Graphics g) {
 		float sweepAngle = 360 * (lifeSpan/ON_DURATION);
         this.paint.setColor(Color.YELLOW);        
@@ -120,11 +124,11 @@ public class BeatCircle extends GameObject {
 	}
 	
 	void drawLabel(Graphics g, String word) {
-		paint.setColor(Color.WHITE);
+		this.paint.setColor(Color.WHITE);
+		this.paint.setStyle(Style.FILL_AND_STROKE);
 		this.paint.setStrokeWidth(1);
-		paint.setTextSize(50);
-		paint.setTextAlign(Align.CENTER);
-		paint.setStyle(Style.FILL_AND_STROKE);
+		this.paint.setTextSize(50);
+		this.paint.setTextAlign(Align.CENTER);
 		g.drawString(word, this.xLocation, this.yLocation-LABEL_LOCATION, paint);		
 	}
 	

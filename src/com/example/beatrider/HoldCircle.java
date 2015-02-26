@@ -46,7 +46,8 @@ public class HoldCircle extends BeatCircle {
 		switch(this.state) {
 			case ON: {
 				lifeSpan += deltaTime;
-				g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, 0xFFFF6600,  Style.FILL_AND_STROKE);
+				drawBeatCircle(g);
+				drawFilled(g);
 				drawTimeArc(g);
 				if (lifeSpan >= OK_TIMING) {
 					drawLabel(g,"Hold!");									
@@ -57,7 +58,7 @@ public class HoldCircle extends BeatCircle {
 			
 			case HOLD: {
 				holdUserDuration += deltaTime;
-				g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, Color.RED,  Style.STROKE);
+				drawBeatCircle(g);
 				drawHoldArc(g);
 				float HOLD_OK_TIMING = holdDuration*.6f;
 				if (holdUserDuration >= HOLD_OK_TIMING) {
@@ -77,7 +78,12 @@ public class HoldCircle extends BeatCircle {
 			}
 		} //end switch
 	}
-		
+
+	void drawFilled(Graphics g) {
+		this.paint.setStrokeWidth(1);
+		g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, 0xFFFF6600,  Style.FILL);
+	}
+	
 	void drawHoldArc(Graphics g) {
 		float sweepAngle = 360 * (holdUserDuration/holdDuration);
 		if (sweepAngle >= 360) {

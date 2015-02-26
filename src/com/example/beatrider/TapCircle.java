@@ -50,7 +50,7 @@ public class TapCircle extends BeatCircle {
 		switch(this.state) {
 			case ON: {
 				lifeSpan += deltaTime;
-				g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, Color.RED,  Style.STROKE);
+				drawBeatCircle(g);
 				drawTapArc(g);
 				drawTapCount(g);
 				break;
@@ -60,7 +60,7 @@ public class TapCircle extends BeatCircle {
 			case TAP: {
 				tapUserDuration += deltaTime;
 				lifeSpan += deltaTime;
-				g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, Color.RED,  Style.STROKE);
+				drawBeatCircle(g);
 				drawTapArc(g);
 				drawTapCount(g);
 				break;

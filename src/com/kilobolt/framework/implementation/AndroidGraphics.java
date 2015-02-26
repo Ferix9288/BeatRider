@@ -170,6 +170,10 @@ public class AndroidGraphics implements Graphics {
     public Canvas getCanvas(){
     	return this.canvas;
     }
+    
+    public Paint getPaint() {
+    	return this.paint;
+    }
    
     @Override
     public int getWidth() {

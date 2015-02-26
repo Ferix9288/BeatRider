@@ -134,7 +134,7 @@ public class GameScreen extends Screen {
         //Load Songs and Beats Here 
 
         // Defining a paint object
-        paint = new Paint();
+        paint = game.getGraphics().getPaint();
         paint.setTextSize(30);
         paint.setTextAlign(Paint.Align.CENTER);
         paint.setAntiAlias(true);
@@ -284,6 +284,7 @@ public class GameScreen extends Screen {
     	
     	for (int i = 0; i < inQueueBeatCircles.size(); i++) {
     		BeatCircle currentBeatCircle = inQueueBeatCircles.get(i);
+    		currentBeatCircle.setPaint(this.paint);
     		if (GameTimer > currentBeatCircle.startTime) {
     			currentBeatCircle.start();
     			inQueueBeatCircles.remove(i);
@@ -480,7 +481,11 @@ public class GameScreen extends Screen {
         g.drawRect(game.getGraphics().getWidth()/4, game.getGraphics().getHeight() - 10, 
         		game.getGraphics().getWidth()/2, 30, Color.GREEN, Style.FILL_AND_STROKE);
 
-        //Timer 
+        //Timer
+        this.paint.setColor(Color.WHITE);
+        this.paint.setStyle(Style.STROKE);
+        this.paint.setStrokeWidth(1);
+        this.paint.setTextSize(50);
         g.drawString(Integer.toString(CountDown), game.getGraphics().getWidth()/2, game.getGraphics().getHeight() - 30, paint);
 
         //FPS
