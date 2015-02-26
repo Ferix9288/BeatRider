@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
+import android.graphics.Point;
 import android.util.Log;
 
 import com.example.beatrider.Beat.BeatType;
@@ -218,14 +219,14 @@ public class GameScreen extends Screen {
 					String floatArrayString = currentBeat.parameters[2];
 					String[] floatArrayDelimited = floatArrayString.split(",");
 					
-					float[] floatArray = new float[floatArrayDelimited.length];
+					float[] tapInterval = new float[floatArrayDelimited.length];
 					for (int i = 0; i < floatArrayDelimited.length; i++) {
-						floatArray[i] = Float.parseFloat(floatArrayDelimited[i]);
+						tapInterval[i] = Float.parseFloat(floatArrayDelimited[i]);
 					}
 					
 					newTapCircle.setInitialization(Integer.parseInt(currentBeat.parameters[0]),
 							Integer.parseInt(currentBeat.parameters[1]), 
-							floatArray, 
+							tapInterval, 
 							Integer.parseInt(currentBeat.parameters[3]));
 					newTapCircle.startTime = startTime;
 					inQueueBeatCircles.add(newTapCircle);
@@ -235,16 +236,42 @@ public class GameScreen extends Screen {
 					HoldCircle newHoldCircle = holdCirclePool.newObject();
 					newHoldCircle.setInitialization(Integer.parseInt(currentBeat.parameters[0]),
 							Integer.parseInt(currentBeat.parameters[1]), 
-							Float.parseFloat(currentBeat.parameters[2]));					newHoldCircle.startTime = startTime;
+							Float.parseFloat(currentBeat.parameters[2]));					
+					newHoldCircle.startTime = startTime;
 					inQueueBeatCircles.add(newHoldCircle);
 
 					break;
 
 				case Drag:
 					DragCircle newDragCircle = dragCirclePool.newObject();
+					
+					//Parse the String to create DragPoints
+					//Format: x0,y0,x1,y1,etc. 
+					String pointsString = currentBeat.parameters[2];
+					String[] pointsStringDelimited = pointsString.split(",");
+					
+					ArrayList<Point> dragPoints = new ArrayList<Point>();
+					
+					for (int i = 0; i < pointsStringDelimited.length; i+=2) {
+						int x = Integer.parseInt(pointsStringDelimited[i]);
+						int y = Integer.parseInt(pointsStringDelimited[i+1]);
+						dragPoints.add(new Point(x, y));
+					}
+					
+					//Parse the String to create float[] of dragTimes
+					//Format: t0, t1, etc.
+					String timesString = currentBeat.parameters[3];
+					String[] timesStringDelimited = timesString.split(",");
+					float[] dragTimes = new float[timesStringDelimited.length];
+					for (int i = 0; i < timesStringDelimited.length; i++) {
+						dragTimes[i] = Float.parseFloat(timesStringDelimited[i]);
+					}
+
 					newDragCircle.setInitialization(Integer.parseInt(currentBeat.parameters[0]),
-							Integer.parseInt(currentBeat.parameters[1]), 
-							Float.parseFloat(currentBeat.parameters[2]));					newDragCircle.startTime = startTime;
+							Integer.parseInt(currentBeat.parameters[1]),
+							dragPoints,
+							dragTimes);
+					newDragCircle.startTime = startTime;
 					inQueueBeatCircles.add(newDragCircle);
 
 					break;

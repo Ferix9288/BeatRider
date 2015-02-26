@@ -24,7 +24,8 @@ public class DragCircle extends BeatCircle {
 	
 	//Additional Instance Variables
 	float dragUserDuration;
-	float dragTotalTime;
+	ArrayList<Point> dragPoints = new ArrayList<Point>();
+	float[] dragTimes;
 	int dragPointer;
 	int resilience;
 	
@@ -38,21 +39,22 @@ public class DragCircle extends BeatCircle {
 		this.type = BeatType.Drag;
 	}
 	
-	public DragCircle(int x, int y, float dragTotal) {
-		setInitialization(x, y, dragTotal);
+	public DragCircle(int x, int y, ArrayList<Point> dragPoints, float[] dragTimes) {
+		setInitialization(x, y, dragPoints, dragTimes);
 	}
 	
-	void setInitialization(int x, int y, float dragTotal) {
+	void setInitialization(int x, int y, ArrayList<Point> dragPoints, float[] dragTimes) {
 		super.setInitialization(x, y);
 		this.dragUserDuration = 0;
-		this.dragTotalTime = dragTotal;
+		this.dragPoints = dragPoints;
+		this.dragTimes = dragTimes;
 		this.resilience = 0;
 		
 		dragUserPath.clear();
 		dragTemplatePath.clear();
 		dragIndex = 0;
 		
-		createDragPath();				
+		//createDragPath();				
 		this.type = BeatType.Drag;
 	}
 	
@@ -60,7 +62,7 @@ public class DragCircle extends BeatCircle {
 		Random r = new Random();
 		int previousX = startingX; 
 		int previousY = startingY;
-		for (int i = DRAG_DIVIDER; i < (int) this.dragTotalTime; i+= DRAG_DIVIDER) {
+		for (int i = DRAG_DIVIDER; i < (int) this.dragTimes[dragIndex]; i+= DRAG_DIVIDER) {
 			float sign = r.nextFloat();
 			if (sign <= 0.5) {
 				sign = -1;
@@ -97,8 +99,7 @@ public class DragCircle extends BeatCircle {
 				dragUserDuration += deltaTime;
 				drawDragCircle(g);
 				drawDragTemplatePath(g);
-				drawUserDragPath(g);
-				float DRAG_OK_TIMING = dragTotalTime*.6f;
+				float DRAG_OK_TIMING = dragTimes[dragTimes.length-1]*.6f; //Last Drag Time
 				if (dragUserDuration >= DRAG_OK_TIMING) {
 					drawLabel(g, "Release!");
 				}
@@ -127,27 +128,17 @@ public class DragCircle extends BeatCircle {
 	}
 	
 	void drawDragTemplatePath(Graphics g) {
-		paint.setStrokeWidth(1);
-		for (int i = dragIndex; i < dragTemplatePath.size()-1; i++) {
-			Point p = dragTemplatePath.get(i);
-			g.drawCircle(p.x, p.y, CIRCLE_RADIUS, 0x30FFFF00,  Style.STROKE);
+		
+		for (int i = 0; i < dragPoints.size(); i++) {
+			if (i <= dragIndex) {
+				Point p = dragPoints.get(i);
+				paint.setStrokeWidth(1);
+				g.drawCircle(p.x, p.y, CIRCLE_RADIUS, 0xFFFFFF00,  Style.STROKE);
+				paint.setStrokeWidth(3);
+				g.drawLine(this.startingX, this.startingY, p.x, p.y, Color.WHITE);
+			}
 		}
-		//Draw Very Last One Differently
-		Point lastPoint = dragTemplatePath.get(dragTemplatePath.size()-1);
-		paint.setStyle(Style.STROKE);
-		paint.setStrokeWidth(5);
-		paint.setColor(Color.YELLOW);
-        g.drawArc(lastPoint.x - CIRCLE_RADIUS, lastPoint.y - CIRCLE_RADIUS, 
-        		lastPoint.x + CIRCLE_RADIUS, lastPoint.y + CIRCLE_RADIUS, -90, 360, true, paint);		
 
-	}
-	
-	void drawUserDragPath(Graphics g) {
-		paint.setStrokeWidth(1);
-		for (int i = 0; i < dragIndex; i++) {
-			Point p = dragTemplatePath.get(i);
-			g.drawCircle(p.x, p.y, CIRCLE_RADIUS, 0x50FFFF00,  Style.STROKE);
-		}
 	}
 	
 	@Override
@@ -167,6 +158,7 @@ public class DragCircle extends BeatCircle {
 						//if (DEBUG) Log.i(TAG, "Touched: " + this.lifeSpan);
 						setRating();
 						if (this.rating == GameUtil.Rating.Good || this.rating == GameUtil.Rating.Perfect) {
+							createDragPath2();
 							this.dragPointer = e.pointer;
 							this.state = DRAG;
 						} else {
@@ -179,7 +171,7 @@ public class DragCircle extends BeatCircle {
 			}
 			
 			case DRAG: {
-				if (dragUserDuration > dragTotalTime + LENIENCY) {
+				if (dragUserDuration > dragTimes[dragTimes.length-1] + LENIENCY) {
 					if (DEBUG) Log.i(TAG, "In State Drag: Expired Drag.");
 					rating = GameUtil.Rating.Miss;
 					this.state = RATING;
@@ -189,10 +181,21 @@ public class DragCircle extends BeatCircle {
 						if (e.pointer == this.dragPointer) {
 							if (e.type == TouchEvent.TOUCH_DRAGGED && isTouched(e.x, e.y)) {
 								if (DEBUG) Log.i(TAG, "In State Drag: Touched.");
+								if (dragUserDuration > dragTimes[dragIndex] && dragIndex < (dragPoints.size()-1)) {
+									Log.e(TAG, "GOT HERE. " + (dragPoints.size()-1));
+									dragIndex++;
+									createDragPath2();
+									
+								}
 								this.resilience = 0;
 							} else { //User Lifted Pointer Up/Missed Circle
-								setDragRating();
-								this.state = RATING;
+								if (dragIndex == dragPoints.size()-1) {
+									setDragRating();
+									this.state = RATING;
+								} else {
+									rating = GameUtil.Rating.Miss;
+									this.state = RATING;									
+								}
 							}
 						} //end if pointer							
 					} else {
@@ -225,9 +228,10 @@ public class DragCircle extends BeatCircle {
 	}
 	
 	void setDragRating() {
-		float DRAG_OK_TIMING = dragTotalTime*.6f;
-		float DRAG_GOOD_TIMING = dragTotalTime*.8f;
-		float DRAG_PERFECT_TIMING = dragTotalTime*.95f;
+		
+		float DRAG_OK_TIMING = dragTimes[dragPoints.size()-1]*.6f;
+		float DRAG_GOOD_TIMING = dragTimes[dragPoints.size()-1]*.8f;
+		float DRAG_PERFECT_TIMING = dragTimes[dragPoints.size()-1]*.95f;
 		
 		if (dragUserDuration >= DRAG_PERFECT_TIMING) {
 			rating = GameUtil.Rating.Perfect;
@@ -240,25 +244,56 @@ public class DragCircle extends BeatCircle {
 		}		
 	}
 	
-	void updateLocation() {
+	
+	void createDragPath2() {
 
-		//dragIndex = (int) (dragUserDuration / dragTotalTime)*dragTemplatePath.size();
-		dragIndex = (int) (dragUserDuration / DRAG_DIVIDER);
-		if (DEBUG) Log.i(TAG, "Update Location: dragUserDuration - " + dragUserDuration
-				+ "||| dragIndex -" + dragIndex);
-		if (dragIndex >= dragTemplatePath.size()) {
-			dragIndex = dragTemplatePath.size() -1;
+		Point destinationPoint = dragPoints.get(dragIndex);
+		Point previousPoint;
+		if (dragIndex >= 1) {
+			previousPoint = dragPoints.get(dragIndex-1);
+		} else {
+			previousPoint = new Point(this.startingX, this.startingY);
+		}
+
+		//Total of DRAG_DIVIDER frames
+		int x = previousPoint.x;
+		int y = previousPoint.y;
+
+		int xIncrement = (int) ( (destinationPoint.x - previousPoint.x) / DRAG_DIVIDER);
+		int yIncrement = (int) ( (destinationPoint.y - previousPoint.y) / DRAG_DIVIDER);
+		
+		dragUserPath.clear();
+		for (int i = 0 ; i < DRAG_DIVIDER; i++) {
+			x += xIncrement;
+			y += yIncrement;
+			dragUserPath.add(new Point(x,y));
 		}
 		
-		Point p = dragTemplatePath.get(dragIndex);
+		dragUserPath.add(new Point(destinationPoint.x, destinationPoint.y));
+
+			
+	}
+	void updateLocation() {
 		
-		this.xLocation = p.x;
-		this.yLocation = p.y;
+		int currentIndex;
+		if (dragIndex == 0) {
+			currentIndex = (int) (dragUserDuration / dragTimes[dragIndex] * (dragUserPath.size()-1) );
+		} else {
+			currentIndex = (int) ( (dragUserDuration-dragTimes[dragIndex-1]) / dragTimes[dragIndex] * (dragUserPath.size()-1) );
+		}
 		
-		this.xLeft = p.x - CIRCLE_RADIUS;
-		this.xRight = p.x + CIRCLE_RADIUS;
-		this.yDown = p.y + CIRCLE_RADIUS;
-		this.yUp = p.y - CIRCLE_RADIUS;
+		if (currentIndex >= dragUserPath.size()) {
+			currentIndex = dragUserPath.size()-1;
+		}
+		
+		Point currentLocation = dragUserPath.get(currentIndex);
+		this.xLocation = currentLocation.x;
+		this.yLocation = currentLocation.y;
+		
+		this.xLeft = this.xLocation - CIRCLE_RADIUS;
+		this.xRight = this.xLocation + CIRCLE_RADIUS;
+		this.yDown = this.yLocation + CIRCLE_RADIUS;
+		this.yUp = this.yLocation - CIRCLE_RADIUS;
 		
 	}
 
