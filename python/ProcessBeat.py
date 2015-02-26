@@ -127,6 +127,7 @@ def main():
     foundOffset = False
     foundFirstBeat = False
     manualCircleLabel = SINGLE_TAP
+    previousManualCircleLabel = SINGLE_TAP
     for line in beatFile:
         spaceDelimiter = line.split()
         extractedTime = spaceDelimiter[0]
@@ -159,6 +160,7 @@ def main():
         else:
             if (not (foundFirstBeat)):
                 previousTimeToAppear = actualTimeToAppear
+                previousManualCircleLabel = manualCircleLabel
                 foundFirstBeat = True
 
 
@@ -172,38 +174,43 @@ def main():
 
         if ( currentTime > currentBeatWindow*beatWindow):
             currentBeatWindow += 1
-
-            overlap = True
     
             suggestedBeatCircle = BeatCircle(0, 0, previousTimeToAppear)
+            doubleBeatCircle = BeatCircle(0, 0, previousTimeToAppear)
 
-            #print beatsInPlay
-            #print beatsInBeatWindow
+            # print "Current Line: " + line
+            # print "previousTimeToAppear: " + str(previousTimeToAppear)
+            # print "previousLabel: " + str(previousManualCircleLabel)
 
 
-            if ( len(beatsInBeatWindow) > 0):
+            if (previousManualCircleLabel != SINGLE_TAP):
+                if (previousManualCircleLabel == HOLD):
+                    # print "Set Circle Hold."
+                    suggestedBeatCircle.setType(HOLD)
+                    suggestedBeatCircle.holdDuration = actualTimeToAppear-previousTimeToAppear
+                elif (previousManualCircleLabel == DRAG):
+                    empty = 0
+
+                elif (previousManualCircleLabel == DOUBLE):
+                    # print "Set Circle Double."
+                    empty = 0
+
+            elif ( len(beatsInBeatWindow) > 0):
                 suggestedBeatCircle.setType(MULTIPLE_TAP)    
                 for beatTime in beatsInBeatWindow:
                     difference = beatTime - previousTimeToAppear
                     suggestedBeatCircle.tapInterval.append(difference)
                     suggestedBeatCircle.tapCount += 1
-            else: 
-                if (manualCircleLabel != SINGLE_TAP):
-                    if (manualCircleLabel == HOLD):
-                        suggestedBeatCircle.setType(HOLD)
-                        suggestedBeatCircle.holdDuration = actualTimeToAppear-previousTimeToAppear
-                    elif (manualCircleLabel == DRAG):
-                        empty = 0
+     
+           
 
-                    elif (manualCircleLabel == DOUBLE):
-                        empty = 0
                 # timeLapse = actualTimeToAppear-previousTimeToAppear
                 # if (timeLapse > beatWindow*1.5):
                 #     suggestedBeatCircle.setType(DRAG)
                 #     suggestedBeatCircle.dragDuration = timeLapse
 
 
-
+            overlap = True
             while(overlap):
 
                 if (currentPath == LEFT_TO_RIGHT_TOP_HALF or currentPath == RIGHT_TO_LEFT_TOP_HALF):
@@ -217,25 +224,47 @@ def main():
                     y = random.randint(topBoundary, screenHeight-bottomBoundary)
          
                 suggestedBeatCircle.relocate(x, y)
-
                 overlap = False
                 for otherBeatCircle in beatsInPlay:
                     if suggestedBeatCircle.overlap(otherBeatCircle):
-                        print "suggested X : " +  str(suggestedBeatCircle.x) + " | suggestedY: " + str(suggestedBeatCircle.y)
-                        print "otherBeatCircleX: " + str(otherBeatCircle.x) + " | otherBeatCircleY:" + str(otherBeatCircle.y)
                         overlap = True
                         break;
+
+                if (previousManualCircleLabel == DOUBLE):
+                    sign = random.random()
+                    if (sign < .5):
+                        sign = -1
+                    else:
+                        sign = 1
+                    doubleY = random.randint(topBoundary, topBoundary*2) 
+                    newY = y+(doubleY*sign) 
+                    if not(newY in range(topBoundary, screenHeight - bottomBoundary)):
+                        overlap = True
+                        break
+                    doubleBeatCircle.relocate(x, newY)
+                    if (doubleBeatCircle.overlap(suggestedBeatCircle)):
+                        overlap = True
+                        break 
+                    else: 
+                       for otherBeatCircle in beatsInPlay:
+                            if doubleBeatCircle.overlap(otherBeatCircle):
+                                overlap = True
+                                break
 
             #On success
             incrementPath()
                 
             beatsInPlay.append(suggestedBeatCircle)
+            if (previousManualCircleLabel == DOUBLE):
+                beatsInPlay.append(doubleBeatCircle)
             beatsInBeatWindow = []
             previousTimeToAppear = actualTimeToAppear
+            previousManualCircleLabel = manualCircleLabel;
 
         else:
             beatsInBeatWindow.append(actualTimeToAppear)
 
+        print beatsInPlay
         for beatCircle in beatsInPlay:
             if (timeInMiliseconds > (beatCircle.time+ON_DURATION*2)):
                 writeBeat(beatCircle)
@@ -295,6 +324,8 @@ def writeBeat(beatCircle):
     string = beatPatternArray + ".add( new Beat("
     beatType = beatCircle.circleType
     beatArguments = ""
+
+    print "In Write Beat: BeatCircle - " + str(beatType)
 
     if (beatType == SINGLE_TAP):
         beatArguments = "BeatType.SingleTap, new String[] {" + '"' + str(beatCircle.x) + '"' + ", " + '"' + str(beatCircle.y) + '"' + "}, " + str(beatCircle.time) + "f));"
