@@ -86,7 +86,7 @@ public class PauseButton extends GameObject {
 		return false;
 	}
 	
-	public boolean pausedPress() {
+	public boolean pausePressed() {
 		if (state == PLAY) {
 			return true;
 		} else {
@@ -94,4 +94,11 @@ public class PauseButton extends GameObject {
 		}
 	}
 	
+	public boolean playPressed() {
+		if (state == PAUSE) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 }

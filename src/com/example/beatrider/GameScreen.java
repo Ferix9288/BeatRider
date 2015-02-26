@@ -111,15 +111,7 @@ public class GameScreen extends Screen {
             
         };    
         holdCirclePool = new Pool<HoldCircle>(holdCircleFactory, 50);
-        
-        
-        //Random Beat Pattern 
-        BeatPattern.add(new Beat(BeatType.SingleTap, new String[]{"500", "500"}, 5000));
-        BeatPattern.add(new Beat(BeatType.SingleTap, new String[]{"500", "500"}, 10000));
-        BeatPattern.add(new Beat(BeatType.SingleTap, new String[]{"700", "500"}, 10000));
-
-        //        BeatPattern.add(new Beat(Beat.BeatType.Beat, BPS*10) );
-
+       
 	}
 	
     // Variable Setup
@@ -350,8 +342,7 @@ public class GameScreen extends Screen {
 	            }
 	            
 	            //Update Pause Button
-	            pauseButton.update(event);
-	                        
+	            pauseButton.update(event);	                        
 	        }
         }
         
@@ -404,8 +395,11 @@ public class GameScreen extends Screen {
         int len = touchEvents.size();
         for (int i = 0; i < len; i++) {
             TouchEvent event = touchEvents.get(i);
-            if (event.type == TouchEvent.TOUCH_UP) {
-
+            
+            //Update Pause Button
+            pauseButton.update(event);
+            if (pauseButton.playPressed()) {
+            	resume();
             }
         }
     }
@@ -447,8 +441,13 @@ public class GameScreen extends Screen {
             g.clearScreen(Color.BLACK);
         	drawRunningUI(deltaTime);
         	drawRunning(deltaTime);
+        	//Draw updated Pause button first
+            if (pauseButton.pausePressed()) {
+            	pause();
+            }
+            
         } else if (state == GameState.Paused) {
-            drawPausedUI();
+            drawPausedUI(deltaTime);
         } else if (state == GameState.GameOver) {
             drawGameOverUI();
         }
@@ -503,11 +502,17 @@ public class GameScreen extends Screen {
     	}
     }
 
-    private void drawPausedUI() {
+    private void drawPausedUI(float deltaTime) {
         Graphics g = game.getGraphics();
+              
         // Darken the entire screen so you can display the Paused screen.
-        g.drawARGB(155, 0, 0, 0);
-
+        //g.drawARGB(155, 0, 0, 0);
+        
+        //paint.setAlpha(0x00);
+        g.drawARGB(10, 0x88, 0x88, 0x88); //Gray Filter
+ 
+        //Pause Button
+        pauseButton.draw(g, deltaTime);
     }
 
     private void drawGameOverUI() {
@@ -519,13 +524,18 @@ public class GameScreen extends Screen {
 
     @Override
     public void pause() {
-        if (state == GameState.Running)
+        if (state == GameState.Running) {
+        	Assets.song.pause();
             state = GameState.Paused;
+        }
     }
 
     @Override
     public void resume() {
-
+    	if (state == GameState.Paused) {
+    		Assets.song.play();
+    		state = GameState.Running;
+    	}
     }
 
     @Override
