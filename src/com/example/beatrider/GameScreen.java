@@ -35,6 +35,8 @@ public class GameScreen extends Screen {
     GameState state = GameState.Ready;
     
     GameReport report;
+    PauseButton pauseButton;
+    HealthBar healthBar;
     
     float GameTimer;
     
@@ -141,6 +143,8 @@ public class GameScreen extends Screen {
         paint.setColor(Color.WHITE);
         
         report = new GameReport();
+        pauseButton = new PauseButton(game.getGraphics());
+        healthBar = new HealthBar(game.getGraphics());
         
         GameTimer = 0;
         CountDown = selectedSong.duration;
@@ -344,6 +348,9 @@ public class GameScreen extends Screen {
 	            		}
 	            	}
 	            }
+	            
+	            //Update Pause Button
+	            pauseButton.update(event);
 	                        
 	        }
         }
@@ -438,7 +445,7 @@ public class GameScreen extends Screen {
         	drawReadyUI();
         } else  if (state == GameState.Running) {
             g.clearScreen(Color.BLACK);
-        	drawRunningUI();
+        	drawRunningUI(deltaTime);
         	drawRunning(deltaTime);
         } else if (state == GameState.Paused) {
             drawPausedUI();
@@ -465,18 +472,13 @@ public class GameScreen extends Screen {
                 640, 300, paint);
     }
 
-    private void drawRunningUI() {
+    private void drawRunningUI(float deltaTime) {
         Graphics g = game.getGraphics();
         //g.drawString("Pause Button here.",
         //        game.getGraphics().getWidth() - 50, game.getGraphics().getHeight() - 10, paint);        
 
-        //Pause Button
-        g.drawRect(game.getGraphics().getWidth()-50, game.getGraphics().getHeight() - 10, 
-        		15, 100, Color.WHITE, Style.FILL_AND_STROKE);
+        pauseButton.draw(g, deltaTime);
         
-        g.drawRect(game.getGraphics().getWidth()-25, game.getGraphics().getHeight() - 10, 
-        		15, 100, Color.WHITE, Style.FILL_AND_STROKE);
-
         //Health Bar
         g.drawRect(game.getGraphics().getWidth()/4, game.getGraphics().getHeight() - 10, 
         		game.getGraphics().getWidth()/2, 30, Color.GREEN, Style.FILL_AND_STROKE);

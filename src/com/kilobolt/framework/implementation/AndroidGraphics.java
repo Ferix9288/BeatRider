@@ -10,6 +10,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.Point;
 import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -110,6 +112,25 @@ public class AndroidGraphics implements Graphics {
     	paint.setStyle(style);
     	canvas.drawCircle(x, y, radius, paint);
     }
+    
+    @Override
+	public void drawTriangle(Point p1, Point p2, Point p3, int color, Style style) {
+    	paint.setColor(color);
+    	paint.setStyle(style);
+    	paint.setAntiAlias(true);
+
+    	Path path = new Path();
+    	path.setFillType(Path.FillType.EVEN_ODD);
+    	path.moveTo(p1.x, p1.y);
+    	path.lineTo(p2.x, p2.y);
+    	path.lineTo(p3.x, p3.y);
+    	path.lineTo(p1.x, p1.y);
+    	path.close();
+
+    	
+    	canvas.drawPath(path, paint);
+    }
+    
     
     @Override
     public void drawARGB(int a, int r, int g, int b) {
