@@ -37,6 +37,7 @@ public class GameScreen extends Screen {
     GameReport report;
     PauseButton pauseButton;
     HealthBar healthBar;
+    ReplayButton replayButton;
     
     float GameTimer;
     
@@ -137,15 +138,14 @@ public class GameScreen extends Screen {
         report = new GameReport();
         pauseButton = new PauseButton(game.getGraphics());
         healthBar = new HealthBar(game.getGraphics());
+        replayButton = new ReplayButton(game.getGraphics());
         
         GameTimer = 0;
         CountDown = selectedSong.duration;
         beatIndex = 0;
         
         state = GameState.Ready;
-        
-//        Assets.song = game.getAudio().createMusic("BestDayCut.mp3");
-//        Assets.song.play();
+    	Assets.song = game.getAudio().createMusic(selectedSong.songFile);
     }
 
     @Override
@@ -184,10 +184,26 @@ public class GameScreen extends Screen {
         // Now the updateRunning() method will be called!
 
     	//Log.e(TAG, "Width / Height : " + game.getGraphics().getWidth() + " " + game.getGraphics().getHeight());
-        if (touchEvents.size() > 0) {
-        	Assets.song = game.getAudio().createMusic(selectedSong.songFile);
+        if (touchEvents.size() > 0 && touchEvents.get(0).type == TouchEvent.TOUCH_DOWN) {
+        	
+        	//Reset Song
+        	Assets.song.seekBegin();
         	Assets.song.play();
+        	
+        	report.reset();
+        	
+            GameTimer = 0;
+            CountDown = selectedSong.duration;
+            beatIndex = 0;            
         	state = GameState.Running;
+        	
+        	pauseButton.reset();
+        	replayButton.reset();
+        	
+        	inQueueBeatCircles.clear();
+			for (int i = 0; i < inGameBeatCircles.size(); i++)
+				freeBeatCircle(inGameBeatCircles.get(i));
+        	inGameBeatCircles.clear();
         }
     }
 
@@ -401,6 +417,12 @@ public class GameScreen extends Screen {
             if (pauseButton.playPressed()) {
             	resume();
             }
+            
+            //Update Replay Button
+            replayButton.update(event);
+            if (replayButton.actionTriggered()) {
+            	reset();
+            }
         }
     }
 
@@ -467,8 +489,12 @@ public class GameScreen extends Screen {
     private void drawReadyUI() {
         Graphics g = game.getGraphics();
         
+        paint.setStyle(Style.FILL_AND_STROKE);
+        paint.setColor(Color.WHITE);
+        paint.setStrokeWidth(1);
+        
         g.drawString("Tap to begin the game.",
-                640, 300, paint);
+                g.getWidth()/2, 300, paint);
     }
 
     private void drawRunningUI(float deltaTime) {
@@ -504,15 +530,23 @@ public class GameScreen extends Screen {
 
     private void drawPausedUI(float deltaTime) {
         Graphics g = game.getGraphics();
-              
-        // Darken the entire screen so you can display the Paused screen.
-        //g.drawARGB(155, 0, 0, 0);
         
-        //paint.setAlpha(0x00);
-        g.drawARGB(10, 0x88, 0x88, 0x88); //Gray Filter
+        //Redraw Running Screen
+        if (replayButton.redraw()) {
+            g.clearScreen(Color.BLACK);
+	        drawRunning(0);
+	        drawRunningUI(0);
+	        replayButton.reset();
+        }
+        
+        //Gray Filter
+        g.drawARGB(10, 0x88, 0x88, 0x88); 
  
         //Pause Button
         pauseButton.draw(g, deltaTime);
+        
+        //Replay Button
+        replayButton.draw(g, deltaTime);
     }
 
     private void drawGameOverUI() {
@@ -522,6 +556,12 @@ public class GameScreen extends Screen {
 
     }
 
+    public void reset() {
+    	if (state == GameState.Paused) {
+    		this.state = GameState.Ready; 
+    	}
+    }
+    
     @Override
     public void pause() {
         if (state == GameState.Running) {

@@ -101,4 +101,8 @@ public class PauseButton extends GameObject {
 			return false;
 		}
 	}
+	
+	public void reset() {
+		this.state = PAUSE;
+	}
 }
