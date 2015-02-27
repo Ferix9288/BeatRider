@@ -15,4 +15,6 @@ public interface Game {
     public Screen getCurrentScreen();
 
     public Screen getInitScreen();
+
+	public void destroy();
 }

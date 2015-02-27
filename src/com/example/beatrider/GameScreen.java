@@ -38,6 +38,7 @@ public class GameScreen extends Screen {
     PauseButton pauseButton;
     HealthBar healthBar;
     ReplayButton replayButton;
+    QuitButton quitButton;
     
     float GameTimer;
     
@@ -139,6 +140,7 @@ public class GameScreen extends Screen {
         pauseButton = new PauseButton(game.getGraphics());
         healthBar = new HealthBar(game.getGraphics());
         replayButton = new ReplayButton(game.getGraphics());
+        quitButton = new QuitButton(game.getGraphics());
         
         GameTimer = 0;
         CountDown = selectedSong.duration;
@@ -423,6 +425,12 @@ public class GameScreen extends Screen {
             if (replayButton.actionTriggered()) {
             	reset();
             }
+            
+            //Update Quit BUtton
+            quitButton.update(event);
+            if (quitButton.actionTriggered()) {
+            	quit();
+            }
         }
     }
 
@@ -532,11 +540,12 @@ public class GameScreen extends Screen {
         Graphics g = game.getGraphics();
         
         //Redraw Running Screen
-        if (replayButton.redraw()) {
+        if (replayButton.redraw() || quitButton.redraw()) {
             g.clearScreen(Color.BLACK);
 	        drawRunning(0);
 	        drawRunningUI(0);
 	        replayButton.reset();
+	        quitButton.reset();
         }
         
         //Gray Filter
@@ -547,6 +556,10 @@ public class GameScreen extends Screen {
         
         //Replay Button
         replayButton.draw(g, deltaTime);
+        
+        //Quit Button
+        quitButton.draw(g, deltaTime);
+        
     }
 
     private void drawGameOverUI() {
@@ -560,6 +573,10 @@ public class GameScreen extends Screen {
     	if (state == GameState.Paused) {
     		this.state = GameState.Ready; 
     	}
+    }
+    
+    public void quit() {
+    	game.destroy();
     }
     
     @Override
@@ -581,7 +598,6 @@ public class GameScreen extends Screen {
     @Override
     public void dispose() {
     	Assets.song.dispose();
-
     }
 
     @Override

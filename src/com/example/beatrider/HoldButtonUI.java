@@ -87,7 +87,7 @@ public abstract class HoldButtonUI extends GameObject {
 		this.paint.setColor(Color.WHITE);
 		this.paint.setStyle(Style.FILL_AND_STROKE);
 		this.paint.setStrokeWidth(1);
-		this.paint.setTextSize(30);
+		this.paint.setTextSize(40);
 		this.paint.setTextAlign(Align.CENTER);
 		g.drawString(word, (this.hitBoxLeft+this.hitBoxRight)/2, this.hitBoxTop-LABEL_LOCATION, paint);		
 	}

@@ -80,6 +80,8 @@ public abstract class AndroidGame extends Activity implements Game {
         screen.resume();
         renderView.resume();
     }
+    
+    
 
     @Override
     public void onPause() {
@@ -87,9 +89,12 @@ public abstract class AndroidGame extends Activity implements Game {
         wakeLock.release();
         renderView.pause();
         screen.pause();
-
         if (isFinishing())
             screen.dispose();
+    }
+    
+    public void destroy() {
+    	finish();
     }
 
     @Override

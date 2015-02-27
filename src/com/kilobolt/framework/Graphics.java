@@ -3,6 +3,7 @@ package com.kilobolt.framework;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Paint.Style;
 import android.graphics.Point;
 
@@ -24,6 +25,8 @@ public interface Graphics {
 	public void drawCircle(int x, int y, int radius, int color, Style style);
 	
 	public void drawTriangle(Point p1, Point p2, Point p3, int color, Style style);
+	
+	 public void drawPath(Path path);
 	
 	public void drawImage(Image image, int x, int y, int srcX, int srcY,
 			int srcWidth, int srcHeight);

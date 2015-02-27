@@ -38,7 +38,7 @@ public class AndroidMusic implements Music, OnCompletionListener, OnSeekComplete
     
     	 if (this.mediaPlayer.isPlaying()){
     	       this.mediaPlayer.stop();
-    	        }
+        }
         this.mediaPlayer.release();
     }
 

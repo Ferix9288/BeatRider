@@ -9,6 +9,5 @@ public class GameActivity extends AndroidGame {
     public Screen getInitScreen() {
         return new GameScreen(this); 
     }
-    
-    
+        
 }

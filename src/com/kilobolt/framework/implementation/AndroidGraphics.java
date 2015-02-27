@@ -131,6 +131,11 @@ public class AndroidGraphics implements Graphics {
     	canvas.drawPath(path, paint);
     }
     
+    @Override
+    public void drawPath(Path path) {
+    	canvas.drawPath(path, paint);
+    }
+    
     
     @Override
     public void drawARGB(int a, int r, int g, int b) {
