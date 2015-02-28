@@ -10,6 +10,8 @@ import com.kilobolt.framework.Input.TouchEvent;
 
 public class GameReport extends GameObject  {
 	
+	static final int SHOW_COMBO = 10;
+	
 	static final int CENTER_GAP = 20;
 	static final int TEXT_SPACING = 60;
 	

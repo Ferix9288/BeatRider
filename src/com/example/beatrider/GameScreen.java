@@ -343,6 +343,7 @@ public class GameScreen extends Screen {
             		if (!beatCircle.isHandled()) {
             			healthBar.update(beatCircle.rating);
             			handleScore(beatCircle.rating);
+            			setCombo(beatCircle);
             			beatCircle.setHandled();
             		}
             	}
@@ -366,6 +367,7 @@ public class GameScreen extends Screen {
 	            		if (!beatCircle.isHandled()) {
 	            			healthBar.update(beatCircle.rating);
 	            			handleScore(beatCircle.rating);
+	            			setCombo(beatCircle);
 	            			beatCircle.setHandled();
 	            		}
 	            	}
@@ -507,6 +509,14 @@ public class GameScreen extends Screen {
     	} // end switch
 	}
     
+	void setCombo(BeatCircle beatCircle) {
+		GameUtil.Rating theRating = beatCircle.rating;
+		if (theRating == GameUtil.Rating.Good || theRating == GameUtil.Rating.Perfect) {
+			if (report.currentStreak >= GameReport.SHOW_COMBO) {
+				beatCircle.setDrawCombo(report.currentStreak);
+			}
+		}
+	}
     @Override
     public void paint(float deltaTime) {
         Graphics g = game.getGraphics();

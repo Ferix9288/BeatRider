@@ -47,8 +47,10 @@ public class BeatCircle extends GameObject {
 	float lifeSpan; 
 	Paint paint;
 	int alpha;
+	int comboNumber;
 	
 	boolean handled = false; 
+	boolean drawCombo = false;
 	
 	
 	public BeatCircle() {
@@ -73,8 +75,10 @@ public class BeatCircle extends GameObject {
 		this.state = WAIT;
 		this.lifeSpan = 0;
 		this.wordLifeSpan = 0;
+		this.comboNumber = 0;
 		this.alpha = 0xFF;
 		this.handled = false;
+		this.drawCombo = false;
 	}
 	
 	void setPaint(Paint globalPaint) {
@@ -103,6 +107,7 @@ public class BeatCircle extends GameObject {
 			
 			case RATING: {
 				drawRating(g);
+				if (this.drawCombo) drawCombo(g);
 				this.wordLifeSpan++;
 				break;
 			}
@@ -167,6 +172,16 @@ public class BeatCircle extends GameObject {
 			default:
 				break;
 		}
+	}
+	
+	void drawCombo(Graphics g) {
+		this.paint.setColor(Color.WHITE);
+		this.paint.setStyle(Style.FILL_AND_STROKE);
+		this.paint.setStrokeWidth(1);
+		this.paint.setTextSize(50);
+		this.paint.setTextAlign(Align.CENTER);
+		g.drawString("COMBO! " + this.comboNumber, this.xLocation, this.yLocation-this.wordLifeSpan-LABEL_LOCATION, paint);		
+		
 	}
 	
 	void update(TouchEvent e) {
@@ -249,6 +264,11 @@ public class BeatCircle extends GameObject {
 	
 	void setHandled() {
 		this.handled = true;
+	}
+	
+	void setDrawCombo(int comboNumber) {
+		this.drawCombo = true;
+		this.comboNumber = comboNumber;
 	}
 	
 	boolean isDone(){

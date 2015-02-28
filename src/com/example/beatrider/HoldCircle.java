@@ -81,7 +81,7 @@ public class HoldCircle extends BeatCircle {
 
 	void drawFilled(Graphics g) {
 		this.paint.setStrokeWidth(1);
-		g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, 0xFFFF6600,  Style.FILL);
+		g.drawCircle(this.xLocation, this.yLocation, CIRCLE_RADIUS, 0x50FF6600,  Style.FILL);
 	}
 	
 	void drawHoldArc(Graphics g) {
