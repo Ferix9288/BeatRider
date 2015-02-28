@@ -37,8 +37,10 @@ public class GameScreen extends Screen {
     GameReport report;
     PauseButton pauseButton;
     HealthBar healthBar;
-    ReplayButton replayButton;
-    QuitButton quitButton;
+    ReplayButton replayButtonPauseScreen;
+    ReplayButton replayButtonGameOver;
+    QuitButton quitButtonPauseScreen;
+    QuitButton quitButtonGameOver;
     
     float GameTimer;
     
@@ -136,11 +138,16 @@ public class GameScreen extends Screen {
         paint.setAntiAlias(true);
         paint.setColor(Color.WHITE);
         
-        report = new GameReport();
-        pauseButton = new PauseButton(game.getGraphics());
-        healthBar = new HealthBar(game.getGraphics());
-        replayButton = new ReplayButton(game.getGraphics());
-        quitButton = new QuitButton(game.getGraphics());
+        Graphics g = game.getGraphics();
+        report = new GameReport(g);
+        pauseButton = new PauseButton(g);
+        healthBar = new HealthBar(g);
+
+        replayButtonPauseScreen = new ReplayButton(g, g.getWidth()/2, g.getHeight()/2);
+        quitButtonPauseScreen = new QuitButton(g, g.getWidth()/2, g.getHeight()/2);
+        
+        replayButtonGameOver = new ReplayButton(g, g.getWidth()/2, g.getHeight()*6/7);
+        quitButtonGameOver = new QuitButton(g, g.getWidth()/2, g.getHeight()*6/7);
         
         GameTimer = 0;
         CountDown = selectedSong.duration;
@@ -193,6 +200,7 @@ public class GameScreen extends Screen {
         	Assets.song.play();
         	
         	report.reset();
+        	report.setTotalScore(selectedSong.beatPattern.size());
         	
             GameTimer = 0;
             CountDown = selectedSong.duration;
@@ -200,7 +208,12 @@ public class GameScreen extends Screen {
         	state = GameState.Running;
         	
         	pauseButton.reset();
-        	replayButton.reset();
+
+        	replayButtonPauseScreen.reset();
+        	replayButtonGameOver.reset();
+        	
+        	quitButtonPauseScreen.reset();
+        	quitButtonGameOver.reset();
         	
         	inQueueBeatCircles.clear();
 			for (int i = 0; i < inGameBeatCircles.size(); i++)
@@ -324,7 +337,8 @@ public class GameScreen extends Screen {
             	if (beatCircle.isDone()) {
             		inGameBeatCircles.remove(j);
             		freeBeatCircle(beatCircle);
-            		report.missCounter ++;
+            		handleScore(beatCircle.rating);
+            		j--;
             	}
             }  	
         } else {
@@ -338,38 +352,28 @@ public class GameScreen extends Screen {
 	            	BeatCircle beatCircle = inGameBeatCircles.get(j);
 	            	beatCircle.update(event);
 	            	if (beatCircle.isDone()) {
+	            		handleScore(beatCircle.rating);
 	            		inGameBeatCircles.remove(j);
 	            		freeBeatCircle(beatCircle);
-	            		switch(beatCircle.rating) {
-							case Bad:
-								report.badCounter++;
-								break;
-							case Ok:
-								report.okCounter++;
-								break;
-							case Good:
-								report.goodCounter++;
-								break;
-							case Perfect:
-								report.perfectCounter++;
-								break;
-							default:
-								break;
-	            		}
+	            		j--;
 	            	}
 	            }
 	            
+	            
+	            
 	            //Update Pause Button
-	            pauseButton.update(event);	                        
+	            pauseButton.update(event);	
+	            
 	        }
         }
         
         // 2. Check miscellaneous events like death:
-        
-        if (livesLeft == 0) {
-            state = GameState.GameOver;
+                
+        //Go to GameOver - if user died or time completed 
+        if (CountDown <= 0) {
+        	addRemainingScore();
+        	gameOver();
         }
-        
         
         // 3. Call individual update() methods here.
         // This is where all the game updates happen.
@@ -421,38 +425,84 @@ public class GameScreen extends Screen {
             }
             
             //Update Replay Button
-            replayButton.update(event);
-            if (replayButton.actionTriggered()) {
+            replayButtonPauseScreen.update(event);
+            if (replayButtonPauseScreen.actionTriggered()) {
             	reset();
             }
             
             //Update Quit BUtton
-            quitButton.update(event);
-            if (quitButton.actionTriggered()) {
+            quitButtonPauseScreen.update(event);
+            if (quitButtonPauseScreen.actionTriggered()) {
             	quit();
             }
         }
     }
 
+    //Options: Replay song. Choose next song. Quit.
     private void updateGameOver(List<TouchEvent> touchEvents) {
         int len = touchEvents.size();
         for (int i = 0; i < len; i++) {
             TouchEvent event = touchEvents.get(i);
-            if (event.type == TouchEvent.TOUCH_UP) {
-                if (event.x > 300 && event.x < 980 && event.y > 100
-                        && event.y < 500) {
-                    nullify();
-    				Activity gameActivity = (Activity) game;
-
-                    Intent launchMenu = new Intent(gameActivity, MenuActivity.class);
-                    gameActivity.startActivity(launchMenu);
-                    return;
-                }
+            
+            //Update Replay Button
+            replayButtonGameOver.update(event);
+            if (replayButtonGameOver.actionTriggered()) {
+            	reset();
+            }
+            
+            //Update Quit BUtton
+            quitButtonGameOver.update(event);
+            if (quitButtonGameOver.actionTriggered()) {
+            	quit();
             }
         }
 
     }
+    
+    void addRemainingScore() {
+    	for (int i = 0 ; i < inGameBeatCircles.size(); i++) {
+    		BeatCircle beatCircle = inGameBeatCircles.get(i);
+    		if (beatCircle.isInRating() || beatCircle.isDone()) {
+    			handleScore(beatCircle.rating);
+    		}
+    		
+    		freeBeatCircle(beatCircle);
+    		inGameBeatCircles.remove(beatCircle);
+    		i--;
+    	}
+    }
 
+	void handleScore(GameUtil.Rating rating) {
+    	switch(rating) {
+		case Miss:
+			report.missCounter++;
+			report.comboBreaker();
+			break;
+		case Bad:
+			report.badCounter++;
+			report.runningScore += GameReport.BAD_SCORE;
+			report.comboBreaker();
+			break;
+		case Ok:
+			report.okCounter++;
+			report.runningScore += GameReport.OK_SCORE;
+			report.comboBreaker();
+			break;
+		case Good:
+			report.goodCounter++;
+			report.runningScore += GameReport.GOOD_SCORE;
+			report.plusCombo();
+			break;
+		case Perfect:
+			report.perfectCounter++;
+			report.runningScore += GameReport.PERFECT_SCORE;
+			report.plusCombo();
+			break;
+		default:
+			break;
+    	} // end switch
+	}
+    
     @Override
     public void paint(float deltaTime) {
         Graphics g = game.getGraphics();
@@ -479,7 +529,7 @@ public class GameScreen extends Screen {
         } else if (state == GameState.Paused) {
             drawPausedUI(deltaTime);
         } else if (state == GameState.GameOver) {
-            drawGameOverUI();
+            drawGameOverUI(deltaTime);
         }
         
     }
@@ -500,6 +550,7 @@ public class GameScreen extends Screen {
         paint.setStyle(Style.FILL_AND_STROKE);
         paint.setColor(Color.WHITE);
         paint.setStrokeWidth(1);
+        paint.setTextSize(65);
         
         g.drawString("Tap to begin the game.",
                 g.getWidth()/2, 300, paint);
@@ -540,12 +591,12 @@ public class GameScreen extends Screen {
         Graphics g = game.getGraphics();
         
         //Redraw Running Screen
-        if (replayButton.redraw() || quitButton.redraw()) {
+        if (replayButtonPauseScreen.redraw() || quitButtonPauseScreen.redraw()) {
             g.clearScreen(Color.BLACK);
 	        drawRunning(0);
 	        drawRunningUI(0);
-	        replayButton.reset();
-	        quitButton.reset();
+	        replayButtonPauseScreen.reset();
+	        quitButtonPauseScreen.reset();
         }
         
         //Gray Filter
@@ -555,28 +606,54 @@ public class GameScreen extends Screen {
         pauseButton.draw(g, deltaTime);
         
         //Replay Button
-        replayButton.draw(g, deltaTime);
+        replayButtonPauseScreen.draw(g, deltaTime);
         
         //Quit Button
-        quitButton.draw(g, deltaTime);
+        quitButtonPauseScreen.draw(g, deltaTime);
         
     }
 
-    private void drawGameOverUI() {
+    private void drawGameOverUI(float deltaTime) {
         Graphics g = game.getGraphics();
-        g.drawRect(0, 0, 1281, 801, Color.BLACK, Style.FILL);
-        g.drawString("GAME OVER.", 640, 300, paint);
-
+        
+        //Redraw Running Screen
+        if (replayButtonGameOver.redraw() || quitButtonGameOver.redraw()) {
+            g.clearScreen(Color.BLACK);
+	        drawRunning(0);
+	        drawRunningUI(0);
+	        replayButtonGameOver.reset();
+	        quitButtonGameOver.reset();
+        }
+        
+        //Gray Filter
+        g.drawARGB(12, 0x88, 0x88, 0x88); 
+        
+        report.draw(g, deltaTime);
+        
+        //Replay Button
+        replayButtonGameOver.draw(g, deltaTime);
+        
+        //Quit Button
+        quitButtonGameOver.draw(g, deltaTime);
+ 
     }
 
     public void reset() {
-    	if (state == GameState.Paused) {
+    	if (state == GameState.Paused || state == GameState.GameOver) {
     		this.state = GameState.Ready; 
     	}
     }
     
     public void quit() {
     	game.destroy();
+    }
+    
+    public void gameOver() {
+    	Assets.song.pause();
+    	report.setScore();
+    	if (state == GameState.Running) {
+    		this.state = GameState.GameOver;
+    	}
     }
     
     @Override

@@ -142,24 +142,23 @@ public class BeatCircle extends GameObject {
         
 		switch (this.rating) {
 			case Miss:
-				paint.setARGB(alpha, 0xFF, 0x00, 0x00); //Red        
+				paint.setARGB(alpha, GameUtil.MISS_COLOR >> 16 & 0xFF, GameUtil.MISS_COLOR >> 8 & 0xFF, GameUtil.MISS_COLOR & 0xFF); //Red        
 				g.drawString("Miss!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
 				break;
 			case Bad:
-				paint.setARGB(alpha, 0xFF, 0x00, 0xFF); //Magenta        
+				paint.setARGB(alpha, GameUtil.BAD_COLOR >> 16 & 0xFF, GameUtil.BAD_COLOR >> 8 & 0xFF, GameUtil.BAD_COLOR & 0xFF); //Red        
 				g.drawString("Bad!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
 				break;
 			case Ok:
-				paint.setARGB(alpha, 0x00, 0xFF, 0xFF); //Cyan
+				paint.setARGB(alpha, GameUtil.OK_COLOR >> 16 & 0xFF, GameUtil.OK_COLOR >> 8 & 0xFF, GameUtil.OK_COLOR & 0xFF); //Red        
 				g.drawString("Ok!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
 				break;						
 			case Good:
-				paint.setARGB(alpha, 0xAD, 0xFF, 0x2F); //Green Yellow
+				paint.setARGB(alpha, GameUtil.GOOD_COLOR >> 16 & 0xFF, GameUtil.GOOD_COLOR >> 8 & 0xFF, GameUtil.GOOD_COLOR & 0xFF); //Red        
 				g.drawString("Good!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
 				break;
 			case Perfect:
-		        this.paint.setColor(Color.GREEN);
-		        paint.setARGB(alpha, 0x00, 0xFF, 0x00); //Green
+				paint.setARGB(alpha, GameUtil.PERFECT_COLOR >> 16 & 0xFF, GameUtil.PERFECT_COLOR >> 8 & 0xFF, GameUtil.PERFECT_COLOR & 0xFF); //Red        
 				g.drawString("Perfect!", this.xLocation, this.yLocation-this.wordLifeSpan, paint);
 				break;
 			default:
@@ -237,11 +236,10 @@ public class BeatCircle extends GameObject {
 		this.state = ON;
 	}
 	
+	boolean isInRating() {
+		return this.state == RATING;
+	}
 	boolean isDone(){
-		if (this.state == DONE) {
-			return true;
-		} else {
-			return false;
-		}
+		return this.state == DONE;
 	}
 }

@@ -14,13 +14,13 @@ public class QuitButton extends HoldButtonUI {
 	
 	static final int DOOR_WIDTH = 120;
 	
-	public QuitButton(Graphics g) {
+	public QuitButton(Graphics g, int x, int y) {
 		super(g);
 				
-		this.hitBoxLeft = g.getWidth()/2 + GAP ;
-		this.hitBoxRight = g.getWidth()/2 + (GAP+DOOR_WIDTH);
-		this.hitBoxTop = g.getHeight()/2-HEIGHT/2;
-		this.hitBoxBottom = g.getHeight()/2+HEIGHT/2;
+		this.hitBoxLeft = x + GAP ;
+		this.hitBoxRight = x + (GAP+DOOR_WIDTH);
+		this.hitBoxTop = y-HEIGHT/2;
+		this.hitBoxBottom = y+HEIGHT/2;
 		
 		
 		this.state = DISPLAY;

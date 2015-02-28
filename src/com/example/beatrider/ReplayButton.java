@@ -17,13 +17,13 @@ public class ReplayButton extends HoldButtonUI {
 	//3 Points for Arrow Tip
 	Point arrowTopRight, arrowBottomRight, arrowLeft;
 	
-	public ReplayButton(Graphics g) {
+	public ReplayButton(Graphics g, int x, int y) {
 		super(g);
 				
-		this.hitBoxLeft = g.getWidth()/2 - (GAP+WIDTH) ;
-		this.hitBoxRight = g.getWidth()/2-GAP;
-		this.hitBoxTop = g.getHeight()/2-HEIGHT/2;
-		this.hitBoxBottom = g.getHeight()/2+HEIGHT/2;
+		this.hitBoxLeft = x - (GAP+WIDTH) ;
+		this.hitBoxRight = x -GAP;
+		this.hitBoxTop = y-HEIGHT/2;
+		this.hitBoxBottom = y+HEIGHT/2;
 		
 		//Play Button
 		arrowTopRight = new Point((this.hitBoxLeft+this.hitBoxRight)/2,this.hitBoxTop-ARROW_HEIGHT);
