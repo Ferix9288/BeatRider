@@ -15,20 +15,20 @@ public class GameReport extends GameObject  {
 	
 	static final int PERFECT_SCORE = 50; 
 	static final int GOOD_SCORE = 40;
-	static final int OK_SCORE = 30;
-	static final int BAD_SCORE = 15;
+	static final int OK_SCORE = 25;
+	static final int BAD_SCORE = 10;
 	
 	static final float A_PLUS_RATING = .98f;
-	static final float A_RATING = .93f;
+	static final float A_RATING = .92f;
 	static final float A_MINUS_RATING = .90f;
 	
 	static final float B_PLUS_RATING = .88f;
-	static final float B_RATING = .83f;
+	static final float B_RATING = .82f;
 	static final float B_MINUS_RATING = .80f;
 	
 	
 	static final float C_PLUS_RATING = .78f;
-	static final float C_RATING = .73f;
+	static final float C_RATING = .72f;
 	static final float C_MINUS_RATING = .70f;
 	
 	static final int GAME_RUNNING = 0;
@@ -44,8 +44,8 @@ public class GameReport extends GameObject  {
 	
 	int currentStreak;
 	int maxStreak;
-	int runningScore;
-	int totalScore;
+	float runningScore;
+	float totalScore;
 	
 	String scoreString;
 	int scoreColor;

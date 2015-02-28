@@ -48,6 +48,8 @@ public class BeatCircle extends GameObject {
 	Paint paint;
 	int alpha;
 	
+	boolean handled = false; 
+	
 	
 	public BeatCircle() {
 		this.type = BeatType.SingleTap;		
@@ -72,6 +74,7 @@ public class BeatCircle extends GameObject {
 		this.lifeSpan = 0;
 		this.wordLifeSpan = 0;
 		this.alpha = 0xFF;
+		this.handled = false;
 	}
 	
 	void setPaint(Paint globalPaint) {
@@ -239,6 +242,15 @@ public class BeatCircle extends GameObject {
 	boolean isInRating() {
 		return this.state == RATING;
 	}
+	
+	boolean isHandled() {
+		return this.handled;
+	}
+	
+	void setHandled() {
+		this.handled = true;
+	}
+	
 	boolean isDone(){
 		return this.state == DONE;
 	}

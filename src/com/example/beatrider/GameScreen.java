@@ -44,7 +44,6 @@ public class GameScreen extends Screen {
     
     float GameTimer;
     
-    private static final int MOCK_TOP = 50;
     int CountDown;
     int currentFPS;
     
@@ -194,34 +193,39 @@ public class GameScreen extends Screen {
 
     	//Log.e(TAG, "Width / Height : " + game.getGraphics().getWidth() + " " + game.getGraphics().getHeight());
         if (touchEvents.size() > 0 && touchEvents.get(0).type == TouchEvent.TOUCH_DOWN) {
-        	
-        	//Reset Song
-        	Assets.song.seekBegin();
-        	Assets.song.play();
-        	
-        	report.reset();
-        	report.setTotalScore(selectedSong.beatPattern.size());
-        	
-            GameTimer = 0;
-            CountDown = selectedSong.duration;
-            beatIndex = 0;            
-        	state = GameState.Running;
-        	
-        	pauseButton.reset();
 
-        	replayButtonPauseScreen.reset();
-        	replayButtonGameOver.reset();
-        	
-        	quitButtonPauseScreen.reset();
-        	quitButtonGameOver.reset();
-        	
-        	inQueueBeatCircles.clear();
-			for (int i = 0; i < inGameBeatCircles.size(); i++)
-				freeBeatCircle(inGameBeatCircles.get(i));
-        	inGameBeatCircles.clear();
+        	state = GameState.Running;
+        	resetGame();
         }
     }
 
+    void resetGame() {
+    	//Reset Song
+    	Assets.song.seekBegin();
+    	Assets.song.play();
+    	
+    	report.reset();
+    	report.setTotalScore(selectedSong.beatPattern.size());
+    	
+        GameTimer = 0;
+        CountDown = selectedSong.duration;
+        beatIndex = 0;            
+    	
+    	pauseButton.reset();
+    	healthBar.reset();
+
+    	replayButtonPauseScreen.reset();
+    	replayButtonGameOver.reset();
+    	
+    	quitButtonPauseScreen.reset();
+    	quitButtonGameOver.reset();
+    	
+    	inQueueBeatCircles.clear();
+		for (int i = 0; i < inGameBeatCircles.size(); i++)
+			freeBeatCircle(inGameBeatCircles.get(i));
+    	inGameBeatCircles.clear();
+
+    }
     private void generateBeats() {
     	//if (DEBUG) Log.i(TAG, "generateBeats:" + currentBeats);
 
@@ -334,10 +338,17 @@ public class GameScreen extends Screen {
             for (int j = 0; j < inGameBeatCircles.size(); j++) {
             	BeatCircle beatCircle = inGameBeatCircles.get(j);
             	beatCircle.update(null);
+            	
+            	if (beatCircle.isInRating()) {
+            		if (!beatCircle.isHandled()) {
+            			healthBar.update(beatCircle.rating);
+            			handleScore(beatCircle.rating);
+            			beatCircle.setHandled();
+            		}
+            	}
             	if (beatCircle.isDone()) {
             		inGameBeatCircles.remove(j);
             		freeBeatCircle(beatCircle);
-            		handleScore(beatCircle.rating);
             		j--;
             	}
             }  	
@@ -351,8 +362,15 @@ public class GameScreen extends Screen {
 	            for (int j = 0; j < inGameBeatCircles.size(); j++) {
 	            	BeatCircle beatCircle = inGameBeatCircles.get(j);
 	            	beatCircle.update(event);
+	            	if (beatCircle.isInRating()) {
+	            		if (!beatCircle.isHandled()) {
+	            			healthBar.update(beatCircle.rating);
+	            			handleScore(beatCircle.rating);
+	            			beatCircle.setHandled();
+	            		}
+	            	}
+	            	
 	            	if (beatCircle.isDone()) {
-	            		handleScore(beatCircle.rating);
 	            		inGameBeatCircles.remove(j);
 	            		freeBeatCircle(beatCircle);
 	            		j--;
@@ -370,8 +388,7 @@ public class GameScreen extends Screen {
         // 2. Check miscellaneous events like death:
                 
         //Go to GameOver - if user died or time completed 
-        if (CountDown <= 0) {
-        	addRemainingScore();
+        if (CountDown <= 0 || healthBar.dead()) {
         	gameOver();
         }
         
@@ -457,19 +474,6 @@ public class GameScreen extends Screen {
             }
         }
 
-    }
-    
-    void addRemainingScore() {
-    	for (int i = 0 ; i < inGameBeatCircles.size(); i++) {
-    		BeatCircle beatCircle = inGameBeatCircles.get(i);
-    		if (beatCircle.isInRating() || beatCircle.isDone()) {
-    			handleScore(beatCircle.rating);
-    		}
-    		
-    		freeBeatCircle(beatCircle);
-    		inGameBeatCircles.remove(beatCircle);
-    		i--;
-    	}
     }
 
 	void handleScore(GameUtil.Rating rating) {
@@ -564,8 +568,7 @@ public class GameScreen extends Screen {
         pauseButton.draw(g, deltaTime);
         
         //Health Bar
-        g.drawRect(game.getGraphics().getWidth()/4, game.getGraphics().getHeight() - 10, 
-        		game.getGraphics().getWidth()/2, 30, Color.GREEN, Style.FILL_AND_STROKE);
+        healthBar.draw(g, deltaTime);
 
         //Timer
         this.paint.setColor(Color.WHITE);
@@ -600,7 +603,8 @@ public class GameScreen extends Screen {
         }
         
         //Gray Filter
-        g.drawARGB(10, 0x88, 0x88, 0x88); 
+        //g.drawARGB(10, 0x88, 0x88, 0x88); 
+        g.drawARGB(10, 0x2f, 0x2f, 0x2f); 
  
         //Pause Button
         pauseButton.draw(g, deltaTime);
@@ -626,8 +630,9 @@ public class GameScreen extends Screen {
         }
         
         //Gray Filter
-        g.drawARGB(12, 0x88, 0x88, 0x88); 
-        
+        //g.drawARGB(12, 0x88, 0x88, 0x88); 
+        g.drawARGB(10, 0x2f, 0x2f, 0x2f); 
+
         report.draw(g, deltaTime);
         
         //Replay Button
