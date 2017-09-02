@@ -7,6 +7,8 @@ import com.example.beatrider.Beat.BeatType;
 
 public class SongCollection {
 	
+	static ArrayList<Song> allSongs = new ArrayList<Song>();
+	
 	static Song BestDay; //American Authors - Best Day of my Life
 	
 	static {
@@ -132,7 +134,10 @@ public class SongCollection {
 		bestDayBeatPattern.add( new Beat(BeatType.MultipleTap, new String[] {"1560", "678", "0,246.712", "2"}, 54082.766f));
 		bestDayBeatPattern.add( new Beat(BeatType.MultipleTap, new String[] {"1674", "214", "0,203.174", "2"}, 54677.778f));
 
-		BestDay = new Song(58, 120, "BestDayCut.mp3", bestDayBeatPattern);
+		BestDay = new Song("Best Day", "American Authors", 58, 120, "BestDayCut.mp3", bestDayBeatPattern);
+		allSongs.add(BestDay);
+		//allSongs.add(BestDay);
+		//allSongs.add(BestDay);
 
 		//BestDay = new Song(58, 120, "BestDayCut.mp3", bestDayBeatPattern);
 		

@@ -50,6 +50,7 @@ public abstract class HoldButtonUI extends GameObject {
 		   //Pause Button
 		
 		switch (state) {
+		
 			case DISPLAY: 
 				drawTheUI(g);
 				break;
@@ -66,7 +67,7 @@ public abstract class HoldButtonUI extends GameObject {
 				drawTimeArc(g);
 				drawTheLabel(g);
 				break;
-
+			
 		} //end switch
 		
 	}

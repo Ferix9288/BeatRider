@@ -23,7 +23,7 @@ import com.kilobolt.framework.Pool.PoolObjectFactory;
 
 public class GameScreen extends Screen {
     enum GameState {
-        Ready, Running, Paused, GameOver
+        SongSelection, Ready, Running, Paused, GameOver
     }
 
 	private static final boolean DEBUG = true;
@@ -47,6 +47,7 @@ public class GameScreen extends Screen {
     int CountDown;
     int currentFPS;
     
+    int songInFocus = 0;
     Song selectedSong = SongCollection.BestDay;
 
     /** 
@@ -80,6 +81,8 @@ public class GameScreen extends Screen {
     static final int BPM = 100;
     static final float BPS = BPM / 60;
     int beatIndex;
+    
+    static ArrayList<SongSelection> SongPicks = new ArrayList<SongSelection>();
 
 	static {
 		beatCircleFactory = new PoolObjectFactory<BeatCircle>() {
@@ -114,6 +117,8 @@ public class GameScreen extends Screen {
             
         };    
         holdCirclePool = new Pool<HoldCircle>(holdCircleFactory, 50);
+        
+
        
 	}
 	
@@ -152,7 +157,20 @@ public class GameScreen extends Screen {
         CountDown = selectedSong.duration;
         beatIndex = 0;
         
-        state = GameState.Ready;
+        //Create all the Song Selections Interface
+        for (int i = 0; i < SongCollection.allSongs.size(); i++) {
+        	Song s = SongCollection.allSongs.get(i);
+
+        	//Come up with difficulty algorithm here         	
+        	SongSelection newSongSelection = new SongSelection(s, g);
+        	SongPicks.add(newSongSelection);
+        	songInFocus = i;
+        }
+        
+        //Select Song in focus 
+        
+        state = GameState.SongSelection;
+        //state = GameState.Ready;
     	Assets.song = game.getAudio().createMusic(selectedSong.songFile);
     }
 
@@ -166,6 +184,10 @@ public class GameScreen extends Screen {
         // Refer to Unit 3's code. We did a similar thing without separating the
         // update methods.
 
+        if (state == GameState.SongSelection) {
+        	updateSongSelection(touchEvents);
+        }
+        
         if (state == GameState.Ready) {
             updateReady(touchEvents);
         }
@@ -184,6 +206,31 @@ public class GameScreen extends Screen {
         }
     }
 
+    //Song Selection Screen
+    //Here, user is presented with a UI to choose and select which Song to play
+    private void updateSongSelection(List<TouchEvent> touchEvents) {
+    	int len = touchEvents.size();
+    	for (int i = 0; i < len; i++) {
+    		TouchEvent event = touchEvents.get(i);
+            
+        	SongSelection selectionInFocus = SongPicks.get(songInFocus);
+        	selectionInFocus.update(event);
+        	
+            if (selectionInFocus.play.actionTriggered()) {
+            	selectionInFocus.play.reset();
+            	state = GameState.Ready;
+            }
+            
+    		//Update Pause Button
+//            pauseButton.update(event);
+//            if (pauseButton.playPressed()) {
+//            	resume();
+//            }
+             
+
+         }
+    }
+    
     private void updateReady(List<TouchEvent> touchEvents) {
         
         // This example starts with a "Ready" screen.
@@ -528,7 +575,11 @@ public class GameScreen extends Screen {
         // g.drawImage(Assets.character, characterX, characterY);
 
         // Secondly, draw the UI above the game elements.
-        if (state == GameState.Ready) {
+        
+        if (state == GameState.SongSelection) {
+        	g.clearScreen(Color.BLACK);
+        	drawSongSelectionUI(deltaTime);
+        } else if (state == GameState.Ready) {
             g.clearScreen(Color.BLACK);
         	drawReadyUI();
         } else  if (state == GameState.Running) {
@@ -557,9 +608,32 @@ public class GameScreen extends Screen {
         // Call garbage collector to clean up memory.
         System.gc();
     }
+    
+    private void drawSongSelectionUI(float deltaTime) {
+    	Graphics g = game.getGraphics();
+    	
+    	SongSelection selectionInFocus = SongPicks.get(songInFocus);
+        //Array of Total Song Selections
+    	
+    	
+    	//Figure out Main Song currently shown / displayed
 
+    	//Current Song Selection in focus. 
+    	
+    	selectionInFocus.setCenter(g.getWidth()/2, g.getHeight()/2);
+    	selectionInFocus.draw(g, deltaTime);
+    	
+    	
+    	//For total song selection - Draw all songs to left with decreasing ratio. 
+    	//OR just draw the previous song 
+    	
+    	//For total song Selection - Draw all songs to right with decreasing ratio
+    	//OR just draw the next song
+    	
+    }
     private void drawReadyUI() {
         Graphics g = game.getGraphics();
+        
         
         paint.setStyle(Style.FILL_AND_STROKE);
         paint.setColor(Color.WHITE);

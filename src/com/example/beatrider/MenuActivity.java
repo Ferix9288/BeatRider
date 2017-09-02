@@ -131,6 +131,7 @@ public class MenuActivity extends Activity {
 		startTextView.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
+				//Insert Screen Selection Activity Here
 				Intent launchGame = new Intent(MenuActivity.this, GameActivity.class);
 				startActivity(launchGame);
 			}
