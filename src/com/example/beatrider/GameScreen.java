@@ -20,6 +20,7 @@ import com.kilobolt.framework.Pool;
 import com.kilobolt.framework.Screen;
 import com.kilobolt.framework.Input.TouchEvent;
 import com.kilobolt.framework.Pool.PoolObjectFactory;
+import com.kilobolt.framework.implementation.AndroidAudio;
 
 public class GameScreen extends Screen {
     enum GameState {
@@ -167,43 +168,45 @@ public class GameScreen extends Screen {
         	songInFocus = i;
         }
         
-        //Select Song in focus 
-        
+        //Select Song in focus         
         state = GameState.SongSelection;
-        //state = GameState.Ready;
-    	Assets.song = game.getAudio().createMusic(selectedSong.songFile);
+        
+        //assets of song - null state for stability (i.e in an unknown state if back button)
+        Assets.song = null;
     }
 
     @Override
     public void update(float deltaTime) {
     	
         List<TouchEvent> touchEvents = game.getInput().getTouchEvents();
+        //Update the game based on its state
+    	switch(state) {
+    		case SongSelection: 
+    			updateSongSelection(touchEvents);
+    			break;
+    		
+    		case Ready: 
+                updateReady(touchEvents);
+                break;
+               
+    		case Running:
+            	generateBeats();
+                updateRunning(touchEvents, deltaTime);
+                break;
 
-        // We have four separate update methods in this example.
-        // Depending on the state of the game, we call differe5nnt update methods.
-        // Refer to Unit 3's code. We did a similar thing without separating the
-        // update methods.
+    		case Paused:
+                updatePaused(touchEvents);
+                break;
+    			
+    		case GameOver:
+                updateGameOver(touchEvents);
+                break;
 
-        if (state == GameState.SongSelection) {
-        	updateSongSelection(touchEvents);
-        }
-        
-        if (state == GameState.Ready) {
-            updateReady(touchEvents);
-        }
-       
-        if (state == GameState.Running) {
-        	generateBeats();
-            updateRunning(touchEvents, deltaTime);
-        }
-       
-        if (state == GameState.Paused) {
-            updatePaused(touchEvents);
-        }
-        
-        if (state == GameState.GameOver) {
-            updateGameOver(touchEvents);
-        }
+    		default: 
+    			//unknown state, log error.
+                updateGameOver(touchEvents);
+                break;    			
+    	} //end switch statement
     }
 
     //Song Selection Screen
@@ -240,17 +243,20 @@ public class GameScreen extends Screen {
 
     	//Log.e(TAG, "Width / Height : " + game.getGraphics().getWidth() + " " + game.getGraphics().getHeight());
         if (touchEvents.size() > 0 && touchEvents.get(0).type == TouchEvent.TOUCH_DOWN) {
-
         	state = GameState.Running;
         	resetGame();
         }
     }
 
     void resetGame() {
-    	//Reset Song
-    	Assets.song.seekBegin();
-    	Assets.song.play();
+    	//Reset Song : note - music does not update correctly if fully completed. Hence, need to dispose old & create new.
+    	if (Assets.song != null) { //if not null, then dispose
+        	Assets.song.dispose();
+    	}
     	
+    	Assets.song = game.getAudio().createMusic(selectedSong.songFile);
+    	Assets.song.seekBegin();   	    	
+
     	report.reset();
     	report.setTotalScore(selectedSong.beatPattern.size());
     	
@@ -271,8 +277,8 @@ public class GameScreen extends Screen {
 		for (int i = 0; i < inGameBeatCircles.size(); i++)
 			freeBeatCircle(inGameBeatCircles.get(i));
     	inGameBeatCircles.clear();
-
     }
+
     private void generateBeats() {
     	//if (DEBUG) Log.i(TAG, "generateBeats:" + currentBeats);
 
@@ -372,12 +378,10 @@ public class GameScreen extends Screen {
     	
     }
     private void updateRunning(List<TouchEvent> touchEvents, float deltaTime) {
-        
-        //This is identical to the update() method from our Unit 2/3 game.
-        
-        
-    	// 1. All touch input is handled here:
-        
+    	//play that funky music white boy~~~~~
+    	Assets.song.play();
+    	
+    	// 1. All touch input is handled here:        
         int len = touchEvents.size();
         if (len == 0) {
             //if (DEBUG) Log.i(TAG, "updateRunning: Null Touch Events - " + deltaTime);
@@ -425,9 +429,7 @@ public class GameScreen extends Screen {
 	            		j--;
 	            	}
 	            }
-	            
-	            
-	            
+	            	            
 	            //Update Pause Button
 	            pauseButton.update(event);	
 	            
@@ -443,7 +445,6 @@ public class GameScreen extends Screen {
         
         // 3. Call individual update() methods here.
         // This is where all the game updates happen.
-        // For example, robot.update();
         
         //Update Timer
         GameTimer += deltaTime;
@@ -569,13 +570,11 @@ public class GameScreen extends Screen {
         Graphics g = game.getGraphics();
         
         // First draw the game elements.
-
         // Example:
         // g.drawImage(Assets.background, 0, 0);
         // g.drawImage(Assets.character, characterX, characterY);
 
         // Secondly, draw the UI above the game elements.
-        
         if (state == GameState.SongSelection) {
         	g.clearScreen(Color.BLACK);
         	drawSongSelectionUI(deltaTime);
@@ -727,10 +726,8 @@ public class GameScreen extends Screen {
  
     }
 
-    public void reset() {
-    	if (state == GameState.Paused || state == GameState.GameOver) {
-    		this.state = GameState.Ready; 
-    	}
+    public void reset() {    		
+		this.state = GameState.Ready;
     }
     
     public void quit() {
@@ -768,6 +765,6 @@ public class GameScreen extends Screen {
 
     @Override
     public void backButton() {
-        pause();
+    	quit();
     }
 }

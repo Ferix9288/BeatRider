@@ -81,6 +81,7 @@ public class GameReport extends GameObject  {
 
 		this.currentStreak = 0;
 		this.maxStreak = 0;
+		this.runningScore = 0;
 		
 		this.state = GAME_RUNNING;
 
@@ -95,8 +96,10 @@ public class GameReport extends GameObject  {
 			//Draw Report Title 
 			drawReportTitle(g);
 			
-			drawScore(g); //A
+			//Draw the score (i.e. 1400.0/1500.0)
+			drawScore(g); 
 			
+			//Draw the ratings
 			drawPerfectRating(g);
 			drawGoodRating(g);
 			drawOkRating(g);
@@ -254,7 +257,6 @@ public class GameReport extends GameObject  {
 			scoreColor = Color.CYAN;
 
 		}
-
 		
 		else if (finalScore >= C_PLUS_RATING) {
 			scoreString= "C+";

@@ -70,7 +70,7 @@ public abstract class AndroidGame extends Activity implements Game {
         setContentView(renderView);
         
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "MyGame");
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyGame");
     }
 
     @Override
@@ -133,4 +133,5 @@ public abstract class AndroidGame extends Activity implements Game {
 
     	return screen;
     }
+    
 }
